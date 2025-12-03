@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğretmen Paneli</title>
+    <link rel="stylesheet" href="css/ogretmenhome.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Öğretmen Paneli</h1>
+            <p>Quiz'lerinizi yönetin ve öğrencilerinizin performansını takip edin</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>12</h3>
+                <p>Toplam Quiz</p>
+            </div>
+            <div class="stat-card">
+                <h3>248</h3>
+                <p>Toplam Katılımcı</p>
+            </div>
+            <div class="stat-card">
+                <h3>3</h3>
+                <p>Aktif Quiz</p>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div class="tabs">
+                <button class="tab active" onclick="changeTab('quizler', event)">Quiz'lerim</button>
+                <button class="tab" onclick="changeTab('raporlar', event)">Raporlar</button>
+                <button class="tab" onclick="changeTab('ayarlar', event)">Ayarlar</button>
+            </div>
+
+            <div class="tab-content" id="tab-content">
+                <div class="action-bar">
+                    <h2 style="color: #333;">Quiz Listesi</h2>
+                    <button class="btn btn-primary" id="createQuizBtn">
+                        ➕ Yeni Quiz Oluştur
+                    </button>
+                </div>
+
+                <div class="quiz-list" id="quiz-list">
+                    <div class="quiz-card">
+                        <div class="quiz-info">
+                            <h3>Matematik Testi</h3>
+                        </div>
+                        <div class="quiz-actions">
+                            <button class="btn btn-success">▶️ Başlat</button>
+                            <button class="btn btn-warning">✏️ Düzenle</button>
+                            <button class="btn btn-danger">🗑️ Sil</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card">
+                        <div class="quiz-info">
+                            <h3>Türkçe Quiz</h3>
+                        </div>
+                        <div class="quiz-actions">
+                            <button class="btn btn-success">▶️ Başlat</button>
+                            <button class="btn btn-warning">✏️ Düzenle</button>
+                            <button class="btn btn-danger">🗑️ Sil</button>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card">
+                        <div class="quiz-info">
+                            <h3>Fen Bilimleri</h3>
+                        </div>
+                        <div class="quiz-actions">
+                            <button class="btn btn-success">▶️ Başlat</button>
+                            <button class="btn btn-warning">✏️ Düzenle</button>
+                            <button class="btn btn-danger">🗑️ Sil</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2>Yeni Quiz Oluştur</h2>
+            <form id="quiz-form">
+                <div class="form-group">
+                    <label>Quiz Başlığı</label>
+                    <input type="text" id="quiz-title" placeholder="Örn: Matematik Testi" required>
+                </div>
+                <div class="form-group">
+                    <label>Açıklama</label>
+                    <textarea id="quiz-description" rows="3" placeholder="Quiz hakkında kısa bir açıklama..."></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Oluştur</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="/js/ogretmen.js"></script>
+</body>
+</html>

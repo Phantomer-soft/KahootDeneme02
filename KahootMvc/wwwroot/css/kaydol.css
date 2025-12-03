@@ -1,0 +1,189 @@
+/*kaydol divi için*/
+
+.form-kaydol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+
+    width: 320px;
+    height: 60vh;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    opacity: 0.8;
+}
+
+.form-kaydol:hover {
+
+    opacity: 1;
+}
+
+#form-kayıt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.form-kaydol h2 {
+    margin-top: 25px;
+    color: whitesmoke;
+}
+
+#ad,
+#soyad,
+#kullaniciAdi,
+#e-mail {
+    width: 250px;
+    height: 45px;
+    border-style: none;
+    border-radius: 5px;
+
+    text-indent: 5px;
+    /* yazı ve imleç başlangıç yeri*/
+    /*caret-color: blueviolet;*/
+    /* imleç rengi*/
+}
+
+.devam-buton {
+    width: 250px;
+    height: 45px;
+    border-style: none;
+    border-radius: 5px;
+    background-color: rgba(29, 3, 86, 0.679);
+    color: whitesmoke;
+    cursor: pointer;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+}
+
+.devam-buton:hover {
+    transform: scale(1.05);
+    /*üzerine gelince butonu büyüt*/
+}
+
+#hesabimVar {
+    color: whitesmoke;
+    margin-top: -10px;
+}
+
+#hesabimVar a {
+    color: rgba(29, 3, 86, 0.679);
+    text-decoration: none;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+}
+
+#hesabimVar a:hover {
+    transform: scale(1.05);
+    /*üzerine gelince yazıyı büyüt*/
+}
+
+/*============================================================================*/
+
+/*KAYDOL İKİNCİ KISIM*/
+
+.form-kaydol-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+
+    width: 320px;
+    height: 60vh;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(6px);
+    border-radius: 10px;
+    opacity: 0.8;
+}
+
+.form-kaydol-2:hover {
+    opacity: 1;
+}
+
+#form-kayıt-2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.form-kaydol-2 h2 {
+    margin-top: 25px;
+    color: whitesmoke;
+}
+
+#sifre,
+#sifre-tekrar {
+    width: 250px;
+    height: 45px;
+    border-style: none;
+    border-radius: 5px;
+
+    text-indent: 5px;
+    /* yazı ve imleç başlangıç yeri*/
+    /*caret-color: blueviolet;*/
+    /* imleç rengi*/
+}
+
+.geri-buton {
+    width: 250px;
+    height: 45px;
+    border-style: none;
+    border-radius: 5px;
+    background-color: rgba(29, 3, 86, 0.679);
+    color: whitesmoke;
+    cursor: pointer;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+}
+
+.geri-buton:hover {
+    transform: scale(1.05);
+    /*üzerine gelince butonu büyüt*/
+}
+
+.kaydol-buton {
+    width: 250px;
+    height: 45px;
+    border-style: none;
+    border-radius: 5px;
+    background-color: rgba(29, 3, 86, 0.679);
+    color: whitesmoke;
+    cursor: pointer;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+}
+
+.kaydol-buton:hover {
+    transform: scale(1.05);
+    /*üzerine gelince butonu büyüt*/
+}
+
+#hesabimVar-2 {
+    margin-top: 15px;
+    color: whitesmoke;
+}
+
+#hesabimVar-2 a {
+    color: rgba(29, 3, 86, 0.679);
+    text-decoration: none;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+}
+
+#hesabimVar-2 a:hover {
+    transform: scale(1.05);
+    /*üzerine gelince butonu büyüt*/
+}

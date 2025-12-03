@@ -1,0 +1,71 @@
+/* Slider ve form geçişleri için */
+.slider {
+    position: relative;
+    width: 320px;
+    height: 60vh;
+    overflow: hidden;
+
+}
+
+.form,
+.form-kaydol {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s ease-in-out;
+    margin-right: 0;
+}
+
+.form-kaydol {
+    transform: translateX(100%);
+}
+
+/* Formları gizle/göster için class'lar */
+.form.active {
+    transform: translateX(0);
+}
+
+.form.hidden {
+    transform: translateX(-100%);
+}
+
+.form-kaydol.active {
+    transform: translateX(0);
+}
+
+.form-kaydol.hidden {
+    transform: translateX(100%);
+}
+
+/*======================================================*/
+.form-kaydol.active {
+    transform: translateX(0);
+}
+
+.form-kaydol.hidden {
+    transform: translateX(-100%);
+}
+
+.form-kaydol-2.active {
+    transform: translateX(0);
+}
+
+.form-kaydol-2.hidden {
+    transform: translateX(100%);
+}
+
+
+
+/*geçişte değişen metinler için css*/
+
+.welcome-style {
+    font-size: 30px;
+    color: whitesmoke;
+}
+
+.text-style {
+    font-size: 20px;
+    color: whitesmoke;
+}

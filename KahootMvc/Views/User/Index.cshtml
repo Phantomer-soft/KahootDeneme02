@@ -1,0 +1,72 @@
+﻿@* 
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kahoot Deneme</title>
+    <link rel="stylesheet" href="/css/nav-style.css">
+    <link rel="stylesheet" href="/css/giris.css">
+    <link rel="stylesheet" href="/css/kaydol.css">
+</head>
+
+<body>
+    <nav>
+        <div class="logo">
+            <a href="#"><img src="/photos/logo.png" alt="Logo"></a>
+            <a href="#">
+                <h2>ESSOFT</h2>
+            </a>
+        </div>
+        <div class="links">
+            <ul>
+                <li><a href="#">Anasayfa</a></li>
+                <li><a href="#">Hakkımızda</a></li>
+                <li><a href="#">İletişim</a></li>
+            </ul>
+        </div>
+    </nav>
+    <!--NAV-STYLE-->
+    <div class="main">
+        <div class="text">
+            <div id="welcome">
+                <h1>Wahoot'a hoş geldiniz.</h1>
+            </div>
+            <div id="text">
+                <h3>Yarışmaya devam etmek için giriş yap, bilginle rakiplerini geride bırak!</h3>
+            </div>
+        </div>
+
+        <div class="form">
+            <h2>Giriş Yap</h2>
+            <input type="email" id="loginemail" placeholder="E-mail" name="Email">
+            <input type="password" id="loginsifre" placeholder="Şifre" name="Password">
+            <button id="loginBtn" type="button" class="giris-buton">Giriş Yap</button>
+            <div id="loginError" class="text-danger"></div>
+
+                     <p id="sifremiUnuttum"><a href="#">Şifremi Unuttum</a></p>
+            <p id="hesabimYok">Hesabınız yok mu? Hemen <a href="#" onclick="showSignup()">kaydol</a></p>
+        </div>
+
+        <div class="form-kaydol" id="form-kaydol"> 
+            <h2>Kayıt Ol</h2>
+
+            <input type="text" minlength="2" placeholder="Ad" id="ad" name="Name" required>
+            <input type="text" minlength="2" placeholder="Soyad" id="soyad" name="Surname" required>
+            <input type="text" minlength="6" placeholder="Kullanıcı Adı" id="kullaniciAdi" name="Username" required>
+            <input type="email" minlength="10" placeholder="E-mail" id="e-mail" name="Email" required>
+            <input type="email" minlength="8" placeholder="Şifre" id="sifre" name="Password" required>
+
+
+     
+            <button id="registerBtn" class="devam-buton"  type="button" >Devam</button>
+            <p id="hesabimVar">Zaten bir hesabın var mı? <a href="#" onclick="showLogin()">Giriş Yap</a></p>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="~/js/script.js"></script> <!--js kullanımı için-->
+</body>
+
+</html>
+ *@

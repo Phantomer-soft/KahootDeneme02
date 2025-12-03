@@ -1,0 +1,477 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Oluştur</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+
+        .question-card {
+            border-left: 4px solid #0d6efd;
+            position: relative;
+        }
+
+        .option-group {
+            transition: all 0.3s ease;
+        }
+
+            .option-group:hover {
+                background-color: #f8f9fa;
+            }
+
+        .form-check-input:checked {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .card-header h6 {
+            font-weight: 600;
+        }
+
+        .add-question-below {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            border: 2px dashed #0d6efd;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            background-color: #f8f9ff;
+            transition: all 0.3s ease;
+        }
+
+            .add-question-below:hover {
+                background-color: #e7f1ff;
+                border-color: #0056b3;
+            }
+
+        .category-badge {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.65rem;
+        }
+
+        .time-input-group {
+            max-width: 200px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="mb-0">
+                            <i class="bi bi-clipboard-check"></i> Yeni Quiz Oluştur
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="quizForm" method="post">
+
+                            <!-- Quiz Temel Bilgileri -->
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">Temel Bilgiler</h5>
+
+                                <div class="mb-3">
+                                    <label for="quizTitle" class="form-label">Quiz Başlığı <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="quizTitle" name="Title" required placeholder="Örn: Genel Kültür Testi">
+                                    <div class="form-text">Quiz için açıklayıcı bir başlık girin</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="quizDescription" class="form-label">Açıklama</label>
+                                    <textarea class="form-control" id="quizDescription" name="Description" rows="3" placeholder="Quiz hakkında kısa bir açıklama yazın..."></textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="quizCategory" class="form-label">Genel Kategori <span class="text-danger">*</span></label>
+                                        <select class="form-select" id="quizCategory" name="Category" required>
+                                            <option value="">Seçiniz...</option>
+                                            <option value="Genel Kültür">Genel Kültür</option>
+                                            <option value="Matematik">Matematik</option>
+                                            <option value="Tarih">Tarih</option>
+                                            <option value="Bilim">Bilim</option>
+                                            <option value="Teknoloji">Teknoloji</option>
+                                            <option value="Spor">Spor</option>
+                                            <option value="Sanat">Sanat</option>
+                                            <option value="Diğer">Diğer</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sorular Bölümü -->
+                            <div class="mb-4">
+                                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                                    <h5 class="mb-0">Sorular</h5>
+                                    <button type="button" class="btn btn-success btn-sm" id="addFirstQuestionBtn">
+                                        <i class="bi bi-plus-circle"></i> İlk Soruyu Ekle
+                                    </button>
+                                </div>
+
+                                <div id="questionsContainer">
+                                    <!-- Sorular buraya dinamik olarak eklenecek -->
+                                </div>
+                            </div>
+
+                            <!-- Form Butonları -->
+                            <div class="d-flex justify-content-between">
+                                <a href="/Quiz/Index" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> İptal
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="bi bi-save"></i> Quiz'i Kaydet
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Soru Template (Görünmez) -->
+    <template id="questionTemplate">
+        <div class="question-wrapper">
+            <div class="card mb-3 question-card">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 class="mb-0">Soru <span class="question-number"></span></h6>
+                            <span class="badge category-badge bg-info question-category-badge"></span>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm remove-question">
+                            <i class="bi bi-trash"></i> Sil
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Soru Kategorisi <span class="text-danger">*</span></label>
+                            <select class="form-select question-category" required>
+                                <option value="">Seçiniz...</option>
+                                <option value="Genel Kültür">Genel Kültür</option>
+                                <option value="Matematik">Matematik</option>
+                                <option value="Tarih">Tarih</option>
+                                <option value="Bilim">Bilim</option>
+                                <option value="Teknoloji">Teknoloji</option>
+                                <option value="Spor">Spor</option>
+                                <option value="Sanat">Sanat</option>
+                                <option value="Diğer">Diğer</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="bi bi-clock"></i> Süre (saniye) <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control question-time" min="5" max="300" value="20" required>
+                            <div class="form-text">Varsayılan: 20 sn</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Puan</label>
+                            <input type="number" class="form-control question-points" min="1" value="10" placeholder="10">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Soru Metni <span class="text-danger">*</span></label>
+                        <textarea class="form-control question-text" rows="2" required placeholder="Sorunuzu buraya yazın..."></textarea>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Şıklar <span class="text-danger">*</span></label>
+                    </div>
+
+                    <div class="options-container">
+                        <!-- Şıklar buraya eklenecek -->
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-primary add-option">
+                        <i class="bi bi-plus"></i> Şık Ekle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Her sorunun altında yeni soru ekleme butonu -->
+            <div class="add-question-below">
+                <button type="button" class="btn btn-success add-question-below-btn">
+                    <i class="bi bi-plus-circle"></i> Buraya Yeni Soru Ekle
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Şık Template (Görünmez) -->
+    <template id="optionTemplate">
+        <div class="input-group mb-2 option-group">
+            <div class="input-group-text">
+                <input class="form-check-input mt-0 correct-answer" type="radio" title="Doğru cevap">
+            </div>
+            <input type="text" class="form-control option-text" placeholder="Şık metni" required>
+            <button class="btn btn-outline-danger remove-option" type="button">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </template>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Quiz Form JavaScript -->
+    <script>
+        let questionCount = 0;
+
+        // İlk soru ekle butonu
+        document.getElementById('addFirstQuestionBtn').addEventListener('click', function() {
+            addQuestion();
+            // İlk soru eklendikten sonra bu butonu gizle
+            this.style.display = 'none';
+        });
+
+        function addQuestion(afterElement = null) {
+            questionCount++;
+            const template = document.getElementById('questionTemplate');
+            const clone = template.content.cloneNode(true);
+
+            // Soru numarasını güncelle
+            clone.querySelector('.question-number').textContent = questionCount;
+
+            // Input name'lerini ayarla (Model Binding için)
+            const questionIndex = questionCount - 1;
+            clone.querySelector('.question-text').name = `Questions[${questionIndex}].Text`;
+            clone.querySelector('.question-points').name = `Questions[${questionIndex}].Points`;
+            clone.querySelector('.question-time').name = `Questions[${questionIndex}].TimeLimit`;
+            clone.querySelector('.question-category').name = `Questions[${questionIndex}].Category`;
+
+            // Kategori değiştiğinde badge'i güncelle
+            const categorySelect = clone.querySelector('.question-category');
+            const categoryBadge = clone.querySelector('.question-category-badge');
+            categorySelect.addEventListener('change', function() {
+                categoryBadge.textContent = this.value || 'Kategori seçilmedi';
+                categoryBadge.className = 'badge category-badge ' + getCategoryColor(this.value);
+            });
+
+            // Sil butonu event listener
+            clone.querySelector('.remove-question').addEventListener('click', function(e) {
+                const wrapper = e.target.closest('.question-wrapper');
+                wrapper.remove();
+                updateQuestionNumbers();
+
+                // Eğer hiç soru kalmadıysa ilk soru ekle butonunu göster
+                if(document.querySelectorAll('.question-card').length === 0) {
+                    document.getElementById('addFirstQuestionBtn').style.display = 'inline-block';
+                }
+            });
+
+            // Şık ekle butonu event listener
+            clone.querySelector('.add-option').addEventListener('click', function(e) {
+                const optionsContainer = e.target.previousElementSibling;
+                addOption(optionsContainer, questionIndex);
+            });
+
+            // Bu sorunun altına yeni soru ekle butonu
+            clone.querySelector('.add-question-below-btn').addEventListener('click', function(e) {
+                const currentWrapper = e.target.closest('.question-wrapper');
+                addQuestion(currentWrapper);
+            });
+
+            // Container'a ekle (belirtilen elemanın sonrasına veya en sona)
+            const container = document.getElementById('questionsContainer');
+            if (afterElement) {
+                // afterElement şu anda DOM'da bir wrapper (question-wrapper) olmalı
+                afterElement.insertAdjacentElement('afterend', clone.querySelector('.question-wrapper'));
+            } else {
+                container.appendChild(clone);
+            }
+
+            // İlk 4 şıkkı otomatik ekle
+            const addedWrapper = afterElement ? afterElement.nextElementSibling : container.lastElementChild;
+            const optionsContainer = addedWrapper.querySelector('.options-container');
+            for(let i = 0; i < 4; i++) {
+                addOption(optionsContainer, questionIndex);
+            }
+
+            updateQuestionNumbers();
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                'Genel Kültür': 'bg-primary',
+                'Matematik': 'bg-success',
+                'Tarih': 'bg-warning',
+                'Bilim': 'bg-info',
+                'Teknoloji': 'bg-secondary',
+                'Spor': 'bg-danger',
+                'Sanat': 'bg-purple',
+                'Diğer': 'bg-dark'
+            };
+            return colors[category] || 'bg-info';
+        }
+
+        function addOption(container, questionIndex) {
+            const template = document.getElementById('optionTemplate');
+            const clone = template.content.cloneNode(true);
+
+            const optionCount = container.querySelectorAll('.option-group').length;
+
+            // Input name'lerini ayarla
+            const radioInput = clone.querySelector('.correct-answer');
+            const textInput = clone.querySelector('.option-text');
+
+            radioInput.name = `Questions[${questionIndex}].CorrectAnswerIndex`;
+            radioInput.value = optionCount;
+            textInput.name = `Questions[${questionIndex}].Options[${optionCount}].Text`;
+
+            // Sil butonu event listener
+            clone.querySelector('.remove-option').addEventListener('click', function(e) {
+                if(container.querySelectorAll('.option-group').length > 2) {
+                    e.target.closest('.option-group').remove();
+                    updateOptionIndices(container, questionIndex);
+                } else {
+                    alert('En az 2 şık olmalıdır!');
+                }
+            });
+
+            container.appendChild(clone);
+        }
+
+        function updateQuestionNumbers() {
+            const questions = document.querySelectorAll('.question-card');
+            questionCount = questions.length;
+
+            questions.forEach((question, index) => {
+                question.querySelector('.question-number').textContent = index + 1;
+
+                // Input name'lerini güncelle
+                question.querySelector('.question-text').name = `Questions[${index}].Text`;
+                question.querySelector('.question-points').name = `Questions[${index}].Points`;
+                question.querySelector('.question-time').name = `Questions[${index}].TimeLimit`;
+                question.querySelector('.question-category').name = `Questions[${index}].Category`;
+
+                const options = question.querySelectorAll('.option-group');
+                options.forEach((option, optionIndex) => {
+                    option.querySelector('.correct-answer').name = `Questions[${index}].CorrectAnswerIndex`;
+                    option.querySelector('.correct-answer').value = optionIndex;
+                    option.querySelector('.option-text').name = `Questions[${index}].Options[${optionIndex}].Text`;
+                });
+            });
+        }
+
+        function updateOptionIndices(container, questionIndex) {
+            const options = container.querySelectorAll('.option-group');
+            options.forEach((option, index) => {
+                option.querySelector('.correct-answer').value = index;
+                option.querySelector('.option-text').name = `Questions[${questionIndex}].Options[${index}].Text`;
+            });
+        }
+
+
+                            //APİ İŞLEMLERİ
+        document.getElementById('quizForm').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Normal submit'i engelle
+
+            const questions = document.querySelectorAll('.question-card');
+
+            if (questions.length === 0) {
+                alert('En az bir soru eklemelisiniz!');
+                return;
+            }
+
+            // Her sorunun doğru cevabı seçili mi ve kategori seçili mi kontrol et
+            for (let i = 0; i < questions.length; i++) {
+                const question = questions[i];
+                const checked = question.querySelector('input.correct-answer:checked');
+                const category = question.querySelector('.question-category').value;
+
+                if (!checked) {
+                    alert(`Soru ${i + 1} için doğru cevabı işaretleyin!`);
+                    return;
+                }
+
+                if (!category) {
+                    alert(`Soru ${i + 1} için kategori seçin!`);
+                    return;
+                }
+            }
+
+            // JSON veri modeli oluştur
+            const quizData = {
+                title: document.getElementById("quizTitle").value,
+                description: document.getElementById("quizDescription").value,
+                questions: []
+            };
+
+            const questionElements = document.querySelectorAll('.question-card');
+
+            questionElements.forEach((q, i) => {
+                const questionText = q.querySelector('.question-text').value || '';
+                const points = Number(q.querySelector('.question-points').value || 10);
+                const time = Number(q.querySelector('.question-time').value || 20);
+                const category = q.querySelector('.question-category').value || '';
+                const checked = q.querySelector('input.correct-answer:checked');
+                const correctIndex = checked ? Number(checked.value) : 0;
+
+                const optionElements = q.querySelectorAll('.option-group');
+                const answers = [];
+
+                optionElements.forEach(op => {
+                    answers.push({ text: op.querySelector('.option-text').value || '' });
+                });
+
+                quizData.questions.push({
+                    text: questionText,
+                    point: points,
+                    time: time,
+                    categoryTitle: category,
+                    correctAnswerIndex: correctIndex,
+                    answers: answers
+
+                });
+            });
+            const jsonData = JSON.stringify(quizData, null, 2);
+
+            // API POST isteği
+            try {
+                const response = await fetch("/teacher/quiz/createquiz", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(quizData)
+                });
+
+                if (response.ok) {
+                    // JSON objesini al
+                    const data = await response.json();
+
+                    // PinCode backend tarafından gönderiliyorsa
+                    var pin = data.pinCode;
+                    alert("Quiz başarıyla kaydedildi! \nPin Kodu: " + pin);
+                    window.location.href = "ogretmen.html";
+                } else {
+                    const err = await response.text();
+                    alert("Hata oluştu: " + err);
+                }
+            } catch (err) {
+                alert("API isteği başarısız: " + (err.message || err));
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html> 
