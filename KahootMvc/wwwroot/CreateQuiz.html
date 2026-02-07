@@ -152,7 +152,6 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div class="d-flex align-items-center gap-2">
                             <h6 class="mb-0">Soru <span class="question-number"></span></h6>
-                            <span class="badge category-badge bg-info question-category-badge"></span>
                         </div>
                         <button type="button" class="btn btn-danger btn-sm remove-question">
                             <i class="bi bi-trash"></i> Sil
@@ -161,20 +160,6 @@
                 </div>
                 <div class="card-body">
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Soru Kategorisi <span class="text-danger">*</span></label>
-                            <select class="form-select question-category" required>
-                                <option value="">Seçiniz...</option>
-                                <option value="Genel Kültür">Genel Kültür</option>
-                                <option value="Matematik">Matematik</option>
-                                <option value="Tarih">Tarih</option>
-                                <option value="Bilim">Bilim</option>
-                                <option value="Teknoloji">Teknoloji</option>
-                                <option value="Spor">Spor</option>
-                                <option value="Sanat">Sanat</option>
-                                <option value="Diğer">Diğer</option>
-                            </select>
-                        </div>
                         <div class="col-md-3">
                             <label class="form-label">
                                 <i class="bi bi-clock"></i> Süre (saniye) <span class="text-danger">*</span>
@@ -256,15 +241,6 @@
             clone.querySelector('.question-text').name = `Questions[${questionIndex}].Text`;
             clone.querySelector('.question-points').name = `Questions[${questionIndex}].Points`;
             clone.querySelector('.question-time').name = `Questions[${questionIndex}].TimeLimit`;
-            clone.querySelector('.question-category').name = `Questions[${questionIndex}].Category`;
-
-            // Kategori değiştiğinde badge'i güncelle
-            const categorySelect = clone.querySelector('.question-category');
-            const categoryBadge = clone.querySelector('.question-category-badge');
-            categorySelect.addEventListener('change', function() {
-                categoryBadge.textContent = this.value || 'Kategori seçilmedi';
-                categoryBadge.className = 'badge category-badge ' + getCategoryColor(this.value);
-            });
 
             // Sil butonu event listener
             clone.querySelector('.remove-question').addEventListener('click', function(e) {
@@ -309,20 +285,6 @@
             updateQuestionNumbers();
         }
 
-        function getCategoryColor(category) {
-            const colors = {
-                'Genel Kültür': 'bg-primary',
-                'Matematik': 'bg-success',
-                'Tarih': 'bg-warning',
-                'Bilim': 'bg-info',
-                'Teknoloji': 'bg-secondary',
-                'Spor': 'bg-danger',
-                'Sanat': 'bg-purple',
-                'Diğer': 'bg-dark'
-            };
-            return colors[category] || 'bg-info';
-        }
-
         function addOption(container, questionIndex) {
             const template = document.getElementById('optionTemplate');
             const clone = template.content.cloneNode(true);
@@ -361,7 +323,6 @@
                 question.querySelector('.question-text').name = `Questions[${index}].Text`;
                 question.querySelector('.question-points').name = `Questions[${index}].Points`;
                 question.querySelector('.question-time').name = `Questions[${index}].TimeLimit`;
-                question.querySelector('.question-category').name = `Questions[${index}].Category`;
 
                 const options = question.querySelectorAll('.option-group');
                 options.forEach((option, optionIndex) => {
@@ -396,23 +357,19 @@
             for (let i = 0; i < questions.length; i++) {
                 const question = questions[i];
                 const checked = question.querySelector('input.correct-answer:checked');
-                const category = question.querySelector('.question-category').value;
 
                 if (!checked) {
                     alert(`Soru ${i + 1} için doğru cevabı işaretleyin!`);
                     return;
                 }
 
-                if (!category) {
-                    alert(`Soru ${i + 1} için kategori seçin!`);
-                    return;
-                }
             }
 
             // JSON veri modeli oluştur
             const quizData = {
                 title: document.getElementById("quizTitle").value,
                 description: document.getElementById("quizDescription").value,
+                category: document.getElementById("quizCategory").value,
                 questions: []
             };
 
@@ -422,7 +379,6 @@
                 const questionText = q.querySelector('.question-text').value || '';
                 const points = Number(q.querySelector('.question-points').value || 10);
                 const time = Number(q.querySelector('.question-time').value || 20);
-                const category = q.querySelector('.question-category').value || '';
                 const checked = q.querySelector('input.correct-answer:checked');
                 const correctIndex = checked ? Number(checked.value) : 0;
 
@@ -437,31 +393,27 @@
                     text: questionText,
                     point: points,
                     time: time,
-                    categoryTitle: category,
                     correctAnswerIndex: correctIndex,
                     answers: answers
 
                 });
             });
             const jsonData = JSON.stringify(quizData, null, 2);
-
+            const userId = localStorage.getItem("userid");
             // API POST isteği
             try {
                 const response = await fetch("/teacher/quiz/createquiz", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "UserId": userId
                     },
                     body: JSON.stringify(quizData)
                 });
 
                 if (response.ok) {
                     // JSON objesini al
-                    const data = await response.json();
-
-                    // PinCode backend tarafından gönderiliyorsa
-                    var pin = data.pinCode;
-                    alert("Quiz başarıyla kaydedildi! \nPin Kodu: " + pin);
+                    alert("Quiz başarıyla kaydedildi!");
                     window.location.href = "ogretmen.html";
                 } else {
                     const err = await response.text();

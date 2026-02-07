@@ -14,6 +14,8 @@ namespace KahootMvc.AppContext
         public DbSet<Quiz> Quizzes { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<PinCode> PinCodes { get; set; }
+        public DbSet<LeaderBoard> LeaderBoards { get; set; }
+        public DbSet<SessionUser> SessionUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,7 +26,7 @@ namespace KahootMvc.AppContext
                 .WithMany(q => q.Sessions)
                 .HasForeignKey("QuizId")
                 .OnDelete(DeleteBehavior.NoAction);
-
+     
             modelBuilder.Entity<Question>()
                 .HasOne(q => q.Quiz)
                 .WithMany(q => q.Questions)

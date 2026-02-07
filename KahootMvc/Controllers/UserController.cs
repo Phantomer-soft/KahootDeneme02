@@ -61,7 +61,11 @@ namespace KahootMvc.Controllers
                 if (user != null)
                 {
                     if(user.Password == loginuser.Password)
-                        return Json(new { success = true, redirectUrl = "ogretmen.html" });
+                        return Json(new { 
+                            success = true, 
+                            redirectUrl = "ogretmen.html",
+                            userid = user.Id.ToString()
+                        });
                     else
                         return Json(new { success = false, message = "Email/kullanıcı adı veya şifre hatalı." });
                 }

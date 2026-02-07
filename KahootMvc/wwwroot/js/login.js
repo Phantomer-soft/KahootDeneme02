@@ -28,6 +28,7 @@ $(document).ready(function () {
             success: function (response) {
                 if (response.success) {
                     window.location.href = response.redirectUrl;
+                    localStorage.setItem("userid", response.userid);
                 } else {
                     alert(response.message);
                 }

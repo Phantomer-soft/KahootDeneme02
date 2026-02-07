@@ -5,13 +5,13 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString =
-    builder.Configuration.GetConnectionString("SqlCon");//app settingsden connection stringi çektim
+    builder.Configuration.GetConnectionString("SqlCon");//app settingsden connection stringi ï¿½ektim
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly()); // Pakette hata aldým projeyi yaparken versiyonu kontrol edip düzelttim önceki versiyon 15.0 yeni => 13.0.1 sýkýntý çözüldü
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly()); // Pakette hata aldï¿½m projeyi yaparken versiyonu kontrol edip dï¿½zelttim ï¿½nceki versiyon 15.0 yeni => 13.0.1 sï¿½kï¿½ntï¿½ ï¿½ï¿½zï¿½ldï¿½
 
-builder.Services.AddDbContext<AppDbContext>(options =>options.UseSqlServer(connectionString));//sql server kullanarak baðlantýyý saðladým 
+builder.Services.AddDbContext<AppDbContext>(options =>options.UseMySql(connectionString,ServerVersion.AutoDetect(connectionString)));//sql server kullanarak baï¿½lantï¿½yï¿½ saï¿½ladï¿½m 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -20,16 +20,16 @@ if (!app.Environment.IsDevelopment())
     
     app.UseHsts();
 }
-// Program.cs veya Startup.cs'den hatýrlatma
-// Program.cs dosyasýnda 'var app = builder.Build();' satýrýndan sonra
+// Program.cs veya Startup.cs'den hatï¿½rlatma
+// Program.cs dosyasï¿½nda 'var app = builder.Build();' satï¿½rï¿½ndan sonra
 
 app.MapControllerRoute(
     name: "areas",
-    // Alan (Area) adýnýn zorunlu olarak URL'de bulunmasýný saðlar
+    // Alan (Area) adï¿½nï¿½n zorunlu olarak URL'de bulunmasï¿½nï¿½ saï¿½lar
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );
 
-// Diðer yönlendirmeler (Varsayýlan yönlendirme)
+// Diï¿½er yï¿½nlendirmeler (Varsayï¿½lan yï¿½nlendirme)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"

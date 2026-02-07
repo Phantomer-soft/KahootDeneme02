@@ -5,11 +5,12 @@ namespace KahootMvc.Models
     public class Quiz
     {
         public Guid Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+        public Guid UserId { get; set; }
+        public Guid CategoryId { get; set; }
+        public string Title { get; set; } = default!;
+        public string Description { get; set; } = default!;
         public bool IsActive { get; set; }
-        public int PinCode { get; set; }
-        public ICollection<Session> Sessions { get; set; }
-        public ICollection<Question> Questions { get; set; }
+        public ICollection<Session> Sessions { get; set; } = default!;
+        public ICollection<Question> Questions { get; set; } = default!;
     }
 }

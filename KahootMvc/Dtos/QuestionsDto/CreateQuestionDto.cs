@@ -15,9 +15,7 @@ namespace KahootMvc.Dtos.QuestionsDto
         [Required(ErrorMessage = "Süre zorunludur")]
         [Range(5, 300, ErrorMessage = "Süre 5-300 saniye arasında olmalıdır")]
         public int Time { get; set; } = 20;
-
-        [Required(ErrorMessage = "Kategori seçimi zorunludur")]
-        public string CategoryTitle { get; set; } // Kategori adı string olarak
+        
 
         [Required(ErrorMessage = "Doğru cevap seçilmelidir")]
         [Range(0, int.MaxValue)]

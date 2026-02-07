@@ -8,6 +8,7 @@ namespace KahootMvc.Dtos.QuizzesDto
         [Required(ErrorMessage = "Quiz başlığı zorunludur")]
         [StringLength(200, MinimumLength = 3)]
         public string Title { get; set; }
+        public string Category { get; set; }
 
         [StringLength(500)]
         public string Description { get; set; }

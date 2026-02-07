@@ -1,11 +1,17 @@
 ﻿
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using KahootMvc.AppContext;
 using KahootMvc.Dtos.QuizzesDto;
 using KahootMvc.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+
 namespace KahootMvc.Areas.Teacher.Controllers
 {
  
@@ -23,16 +29,6 @@ namespace KahootMvc.Areas.Teacher.Controllers
             _mapper = mapper;
         }
 
-
-
-        // Aktif quiz listesini göstermek için
-        public IActionResult Index =>
-            // Burada veritabanından öğretmene ait quizler çekilecek ve View'e gönderilecek.
-            View();
-
-
-
-
         // Yeni quiz oluşturma formunu göstermek için
         [HttpGet]
         public IActionResult CreateQuiz()
@@ -46,6 +42,7 @@ namespace KahootMvc.Areas.Teacher.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateQuiz([FromBody]CreateQuizDto dto)
         {
+            var UserId = Request.Headers["UserId"]; // headerda gelen user id yi aldım 
             if (!ModelState.IsValid)
             {
                 // Geçersiz giriş hataları varsa formu tekrar göster
@@ -54,16 +51,33 @@ namespace KahootMvc.Areas.Teacher.Controllers
             else
                 try
                 {
-                    // Random PinCode oluştur 6 hane
-                    var pinCode = CreatePinCode();
-
+                    var category = _context.Categories.FirstOrDefault(c => c.Title == dto.Category);
+                    if (category == null)
+                    {
+                        try
+                        {
+                            Category newcategory = new()
+                            {
+                                Id =  Guid.NewGuid(),
+                                Title = dto.Category,
+                            };
+                            _context.Categories.Add(newcategory);
+                            _context.SaveChanges();
+                            category = newcategory;
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine("kategori olusturulamadi ");
+                        }
+                    }
                     var quiz = new Quiz
                     {
                         Id = Guid.NewGuid(),
+                        UserId = Guid.Parse(UserId), // Headerdan gelen user id
                         Title = dto.Title,
                         Description = dto.Description,
                         IsActive = true,
-                        PinCode = pinCode,
+                        CategoryId = category.Id,
                         Questions = new List<Question>()// Sorular için liste
                     };
 
@@ -71,20 +85,7 @@ namespace KahootMvc.Areas.Teacher.Controllers
                     int questionOrder = 1;
                     foreach (var questionDto in dto.Questions)
                     {
-                        // Kategoriyi bul veya oluştur
-                        var category = await _context.Categories
-                            .FirstOrDefaultAsync(c => c.Title == questionDto.CategoryTitle);
-
-                        if (category == null)//Bulamazsan yeni kategori oluştur
-                        {
-                            category = new Category
-                            {
-                                Id = Guid.NewGuid(),
-                                Title = questionDto.CategoryTitle
-                            };
-                            await _context.Categories.AddAsync(category);
-                        }
-
+                       
                         // Soru oluşturma
                         var question = new Question
                         {
@@ -94,7 +95,6 @@ namespace KahootMvc.Areas.Teacher.Controllers
                             Time = questionDto.Time,
                             Order = questionOrder++,
                             QuizId = quiz.Id,
-                            CategoryId = category.Id,
                             Answers = new List<Answer>()
                         };
 
@@ -121,7 +121,7 @@ namespace KahootMvc.Areas.Teacher.Controllers
                     // Veritabanına kaydet
                     await _context.Quizzes.AddAsync(quiz);
                     await _context.SaveChangesAsync();
-                    return Ok(new { PinCode = pinCode });
+                    return Ok();
                 }
                 catch (Exception ex)
                 {
@@ -130,15 +130,52 @@ namespace KahootMvc.Areas.Teacher.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetQuizzes()
+        public async Task<ActionResult<IEnumerable<GetQuizInfoDto>>> GetQuizzes(string userid)
         {
-            var quizzes = _context.Quizzes
-                .Include(q => q.Questions)
-                .OrderByDescending(q => q.Id)
-                .ToList();
-            return View(quizzes);
+            var userGuid = Guid.Parse(userid);
+            var list = await _context.Quizzes
+                .Where(x => x.UserId == userGuid)
+                .Select(x => new GetQuizInfoDto
+                {
+                    QuizId = x.Id,
+                    Title = x.Title,
+                    Description = x.Description,
+                    QuestionCount = x.Questions.Count
+                })
+                .ToListAsync();
+            return Ok(list);
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetQuiz(string id)
+        {
+            try
+            {
+                var quizId = Guid.Parse(id);
+                var quiz = await _context.Quizzes
+                    .Include(q => q.Questions)
+                    .ThenInclude(q => q.Answers)
+                    .FirstAsync(q => q.Id == quizId);
+                return Ok(quiz);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return BadRequest(new { message = e.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteQuiz(int id)
+        {
+            var quiz = await _context.Quizzes.FindAsync(id);
+            if (quiz == null) return NotFound();
+
+            _context.Quizzes.Remove(quiz);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
 
         public int CreatePinCode()
         {
