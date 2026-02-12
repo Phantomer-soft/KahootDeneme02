@@ -6,12 +6,12 @@ namespace KahootMvc.Models
     {
         public Guid Id { get; set; }
         public int PinCode { get; set; }
-        public Guid CurrentQuestionId { get; set; }
+        public Guid ? CurrentQuestionId { get; set; }
         [ForeignKey(nameof(LeaderBoardId))]
-        public Guid LeaderBoardId { get; set; }
-        public Question CurrentQuestion { get; set; } = default!;
+        public Guid ? LeaderBoardId { get; set; }
+        public int CurrentQuestion { get; set; }
         public DateTime? CurrentQuestionStartedAt { get; set; }
-        public Quiz Quiz { get; set; }=default!;
+        public Quiz?  Quiz { get; set; }=default!;
         public bool IsEnded { get; set; }=false; // True olduğu zaman pin kodu değişecek 
     }
 }

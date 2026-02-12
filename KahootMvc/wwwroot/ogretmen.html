@@ -76,7 +76,46 @@
                 </div>
             </form>
         </div>
+        <div id="waitingSection" class="hidden">
+                <div class="pin-display">
+                    <h2>Öğrenciler Katılsın</h2>
+                    <div>Öğrenciler bu PIN kodunu girsin:</div>
+                    <div class="pin-code" id="pinCode">------</div>
+                    <div>Quiz: <span id="quizTitle"></span></div>
+                    <div>Toplam Soru: <span id="totalQuestions">0</span></div>
+                </div>
+
+                <h3>Katılımcılar (<span id="participantCount">0</span>)</h3>
+                <div class="participants" id="participantsList"></div>
+
+                <button onclick="startSession()" id="startButton" style="width: 100%; margin-top: 20px;">
+                    Oyunu Başlat
+                </button>
+            </div>
+            <div id="gameSection" class="hidden">
+                <div class="current-question" id="currentQuestionDisplay"></div>
+
+                <h3>Anlık Sıralama</h3>
+                <div class="leaderboard" id="liveLeaderboard"></div>
+
+                <button onclick="nextQuestion()" id="nextButton" style="width: 100%; margin-top: 20px;">
+                    Sonraki Soru
+                </button>
+            </div>
+
+            <!-- Sonuç Ekranı -->
+            <div id="resultsSection" class="hidden">
+                <h2>🏆 Final Sonuçları</h2>
+                <div class="leaderboard" id="finalLeaderboard"></div>
+                <button onclick="location.reload()" style="width: 100%; margin-top: 20px;">
+                    Yeni Session Başlat
+                </button>
+            </div>
+
+            <div id="status"></div>
+        </div>
     </div>
     <script src="/js/ogretmen.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@ namespace KahootMvc.Models
         public Guid Id { get; set; }
         public string Text { get; set; } = default!;
         public int Point { get; set; }
-        public int Time { get; set; }
+        public int Time{ get; set; }
         public int Order { get; set; }
         [ForeignKey(nameof(QuizId))]
         public Guid QuizId { get; set; }

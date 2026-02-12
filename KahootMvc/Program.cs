@@ -2,6 +2,8 @@ using KahootMvc.AppContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using KahootMvc;
+using KahootMvc.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString =
@@ -10,8 +12,14 @@ var connectionString =
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly()); // Pakette hata ald�m projeyi yaparken versiyonu kontrol edip d�zelttim �nceki versiyon 15.0 yeni => 13.0.1 s�k�nt� ��z�ld�
-
 builder.Services.AddDbContext<AppDbContext>(options =>options.UseMySql(connectionString,ServerVersion.AutoDetect(connectionString)));//sql server kullanarak ba�lant�y� sa�lad�m 
+builder.Services.AddScoped<Functions>();
+builder.Services.AddSignalR();
+builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
+    policy.SetIsOriginAllowed(origin => true) // Tüm originlere izin ver
+        .AllowAnyMethod()                  // GET, POST vb. hepsine izin ver
+        .AllowAnyHeader()                  // Tüm başlıklara izin ver
+        .AllowCredentials()));      
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,7 +42,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}"
 );
-
+app.MapHub<QuizHub>("/QuizHub");
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.MapGet("/", () => Results.File("index.html", "text/html"));

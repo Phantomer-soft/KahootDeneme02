@@ -53,6 +53,7 @@ async function loadQuizzes() {
 
     try {
         const userId = localStorage.getItem("userid");
+        localStorage.removeItem("editQuiz");
 
         if (!userId) {
             throw new Error("UserId localStorage'da yok");
@@ -101,7 +102,7 @@ async function loadQuizzes() {
                     <span class="badge">📝 ${questionCount} Soru</span>
                 </div>
                 <div class="quiz-actions">
-                    <button class="btn btn-success" onclick="startQuiz('${quizId}')">▶️ Başlat</button>
+                    <button class="btn btn-success" onclick="createSession('${quizId}')">▶️ Başlat</button>
                     <button class="btn btn-warning" onclick="editQuiz('${quizId}')">✏️ Düzenle</button>
                     <button class="btn btn-danger" onclick="deleteQuiz('${quizId}')">🗑️ Sil</button>
                 </div>
@@ -120,10 +121,73 @@ async function loadQuizzes() {
         `;
     }
 }
-function startQuiz(quizId) {
-    alert('Starting quiz ' + quizId);
-    // Implement start quiz logic
-}
+async function initSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7117/QuizHub")
+                .withAutomaticReconnect()
+                .build();
+
+            // Event Listeners
+            connection.on("UserJoined", (data) => {
+                showStatus(`${data.Username} katıldı!`, 'success');
+                participants.push(data.Username);
+                updateParticipantsList(data.TotalUsers);
+            });
+
+            connection.on("SessionStarted", (message) => {
+                showStatus(message, 'success');
+                document.getElementById('waitingSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+            });
+
+            connection.on("NewQuestion", (data) => {
+                displayQuestion(data);
+            });
+
+            connection.on("ShowResults", (data) => {
+                displayResults(data);
+            });
+
+            connection.on("SessionEnded", (data) => {
+                showFinalResults(data);
+            });
+
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+            } catch (err) {
+                console.error(err);
+                showStatus("Bağlantı hatası: " + err, 'error');
+            }
+        }
+//odayı olustur 
+async function createSession(quizId) {
+            initSignalR();
+            const teacherId = localStorage.getItem("teacherId");
+            try {
+                const response = await connection.invoke("CreateSession", teacherId, quizId);
+
+                if(response.status)
+                    alert("session olusturuldu");
+                showStatus('Session başarıyla oluşturuldu!', 'success');
+            } catch (err) {
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+// Oyunu Başlat
+        async function startSession() {
+            if (participants.length === 0) {
+                showStatus('En az 1 katılımcı gerekli!', 'error');
+                return;
+            }
+
+            try {
+                await connection.invoke("StartSession", currentPinCode);
+            } catch (err) {
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+
 
 function editQuiz(quizId) {
     window.location.href = `/edit.html`;
@@ -133,13 +197,29 @@ function editQuiz(quizId) {
 async function deleteQuiz(quizId) {
     if (confirm('Bu quizi silmek istediğinizden emin misiniz?')) {
         try {
-            const response = await fetch(`/teacher/quiz/delete/${quizId}`, {
-                method: 'DELETE'
+            const userId = localStorage.getItem('userid'); 
+            
+            if (!userId) {
+                alert('Kullanıcı bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+                return;
+            }
+            
+            const response = await fetch(`/teacher/quiz/DeleteQuiz`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'userId': userId,
+                    'quizId': quizId
+                }
             });
+            
             if (response.ok) {
+                alert('Quiz başarıyla silindi!');
                 await loadQuizzes(); // Listeyi yeniden yükle
             } else {
-                throw new Error('Quiz silinemedi');
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Quiz silinemedi');
+                console.log(errorData);
             }
         }
         catch (error) {
@@ -148,6 +228,123 @@ async function deleteQuiz(quizId) {
         }
     }
 }
+
+
+// Sonraki Soru
+        async function nextQuestion() {
+            try {
+                await connection.invoke("NextQuestion", currentPinCode);
+            } catch (err) {
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+
+        // Soru Göster
+        function displayQuestion(data) {
+            const questionHtml = `
+                <div style="margin-bottom: 15px;">
+                    <span style="background: #667eea; color: white; padding: 8px 15px; border-radius: 20px;">
+                        Soru ${data.QuestionNumber}/${data.TotalQuestions}
+                    </span>
+                    <span style="float: right; background: #f5576c; color: white; padding: 8px 15px; border-radius: 20px;">
+                        ⏱️ ${data.TimeLimit} saniye
+                    </span>
+                </div>
+                <div class="question-text">${data.QuestionText}</div>
+                ${data.ImageUrl ? `<img src="${data.ImageUrl}" style="max-width: 100%; border-radius: 8px; margin: 15px 0;">` : ''}
+                <div class="options">
+                    ${data.Options.map((opt, idx) => `
+                        <div class="option">${String.fromCharCode(65 + idx)}: ${opt}</div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('currentQuestionDisplay').innerHTML = questionHtml;
+        }
+
+        // Sonuçları Göster
+        function displayResults(data) {
+            const questionDiv = document.getElementById('currentQuestionDisplay');
+            const options = questionDiv.querySelectorAll('.option');
+
+            options.forEach(opt => {
+                if (opt.textContent.includes(data.CorrectAnswer)) {
+                    opt.classList.add('correct');
+                }
+            });
+
+            if (data.Explanation) {
+                questionDiv.innerHTML += `
+                    <div style="margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 8px;">
+                        <strong>Açıklama:</strong> ${data.Explanation}
+                    </div>
+                `;
+            }
+
+            updateLeaderboard(data.Leaderboard);
+        }
+
+        // Sıralamayı Güncelle
+        function updateLeaderboard(leaderboard) {
+            const html = leaderboard.map((user, index) => `
+                <div class="leaderboard-item">
+                    <div>
+                        <span style="font-size: 24px; margin-right: 10px;">
+                            ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                        </span>
+                        <strong>${user.Username}</strong>
+                    </div>
+                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">
+                        ${user.Score} puan
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('liveLeaderboard').innerHTML = html;
+        }
+
+        // Final Sonuçları
+        function showFinalResults(data) {
+            document.getElementById('gameSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+
+            const html = data.FinalLeaderboard.map((user, index) => `
+                <div class="leaderboard-item">
+                    <div>
+                        <span style="font-size: 32px; margin-right: 10px;">
+                            ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                        </span>
+                        <strong style="font-size: 20px;">${user.Username}</strong>
+                    </div>
+                    <div style="font-size: 28px; font-weight: bold; color: #667eea;">
+                        ${user.Score} puan
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('finalLeaderboard').innerHTML = html;
+
+            if (data.Winner) {
+                showStatus(`🎉 Kazanan: ${data.Winner.Username} - ${data.Winner.Score} puan!`, 'success');
+            }
+        }
+
+        // Katılımcı Listesi Güncelle
+        function updateParticipantsList(count) {
+            document.getElementById('participantCount').textContent = count;
+            const html = participants.map(p => `
+                <div class="participant">
+                    <div style="font-size: 40px;">👤</div>
+                    <div style="margin-top: 8px; font-weight: 600;">${p}</div>
+                </div>
+            `).join('');
+            document.getElementById('participantsList').innerHTML = html;
+        }
+
+        // Durum Mesajı
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            setTimeout(() => statusDiv.textContent = '', 5000);
+        }
 
 // Sayfa yüklendiğinde quizleri yükle
 document.addEventListener('DOMContentLoaded', loadQuizzes);

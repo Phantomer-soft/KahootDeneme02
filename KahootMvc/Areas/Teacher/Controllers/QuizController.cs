@@ -51,25 +51,7 @@ namespace KahootMvc.Areas.Teacher.Controllers
             else
                 try
                 {
-                    var category = _context.Categories.FirstOrDefault(c => c.Title == dto.Category);
-                    if (category == null)
-                    {
-                        try
-                        {
-                            Category newcategory = new()
-                            {
-                                Id =  Guid.NewGuid(),
-                                Title = dto.Category,
-                            };
-                            _context.Categories.Add(newcategory);
-                            _context.SaveChanges();
-                            category = newcategory;
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine("kategori olusturulamadi ");
-                        }
-                    }
+                    var categoryId = Guid.Parse(dto.Category);
                     var quiz = new Quiz
                     {
                         Id = Guid.NewGuid(),
@@ -77,7 +59,7 @@ namespace KahootMvc.Areas.Teacher.Controllers
                         Title = dto.Title,
                         Description = dto.Description,
                         IsActive = true,
-                        CategoryId = category.Id,
+                        CategoryId = categoryId,
                         Questions = new List<Question>()// Sorular için liste
                     };
 
@@ -165,6 +147,122 @@ namespace KahootMvc.Areas.Teacher.Controllers
             }
         }
 
+        [HttpPut]
+public async Task<IActionResult> UpdateQuiz(
+    [FromBody] UpdateQuizDto dto,
+    [FromHeader(Name = "Userid")] string userId)
+{
+    var userGuid = Guid.Parse(userId);
+
+    var quiz = await _context.Quizzes
+        .Include(q => q.Questions)
+            .ThenInclude(q => q.Answers)
+        .FirstOrDefaultAsync(q => q.Id == dto.QuizId && q.UserId == userGuid);
+
+    if (quiz == null)
+        return NotFound();
+
+    quiz.Title = dto.Title;
+    quiz.Description = dto.Description;
+    quiz.CategoryId = dto.CategoryId;
+
+    var incomingQuestionIds = dto.Questions
+        .Where(q => q.QuestionId.HasValue)
+        .Select(q => q.QuestionId!.Value)
+        .ToList();
+
+    var removedQuestions = quiz.Questions
+        .Where(q => !incomingQuestionIds.Contains(q.Id))
+        .ToList();
+
+    _context.Questions.RemoveRange(removedQuestions);
+
+    foreach (var qDto in dto.Questions)
+    {
+        Question question;
+
+        if (qDto.QuestionId.HasValue)
+        {
+            question = quiz.Questions.First(q => q.Id == qDto.QuestionId.Value);
+            question.Text = qDto.Text;
+            question.Time = qDto.Time;
+            question.Point = qDto.Point;
+        }
+        else
+        {
+            question = new Question
+            {
+                Id = Guid.NewGuid(),
+                QuizId = quiz.Id,
+                Text = qDto.Text,
+                Time = qDto.Time,
+                Point = qDto.Point,
+                Order = quiz.Questions.Count,
+                Answers = new List<Answer>()
+            };
+
+            quiz.Questions.Add(question);
+            _context.Questions.Add(question);
+        }
+
+        var incomingAnswerIds = qDto.Answers
+            .Where(a => a.AnswerId.HasValue)
+            .Select(a => a.AnswerId!.Value)
+            .ToList();
+
+        var removedAnswers = question.Answers
+            .Where(a => !incomingAnswerIds.Contains(a.Id))
+            .ToList();
+
+        _context.Answers.RemoveRange(removedAnswers);
+
+        foreach (var aDto in qDto.Answers)
+        {
+            if (aDto.AnswerId.HasValue)
+            {
+                var answer = question.Answers
+                    .First(a => a.Id == aDto.AnswerId.Value);
+
+                answer.Text = aDto.Text;
+                answer.IsCorrect = aDto.IsCorrect;
+            }
+            else
+            {
+                var qguid =  Guid.NewGuid();
+                var answer = new Answer()
+                {
+                    Id = qguid,
+                    Text = aDto.Text,
+                    IsCorrect =  aDto.IsCorrect,
+                    AnswerOrder = question.Answers.Count
+                };
+                _context.Answers.Add(answer);
+                question.Answers.Add(answer);
+            }
+        }
+    }
+    await _context.SaveChangesAsync();
+    return Ok();
+}
+        [HttpGet]
+        public async Task<IActionResult> DeleteQuiz([FromHeader] string userId, string quizId)
+        {
+            var userid = Guid.Parse(userId);
+            var user = _context.Users.FirstOrDefault(u=> u.Id == userid);
+            var quiz = await _context.Quizzes.FindAsync(quizId);
+            if (quiz.UserId == user.Id)
+            {
+                quiz.IsActive = false;
+                _context.Quizzes.Update(quiz);
+                await _context.SaveChangesAsync();  
+                return Ok();
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteQuiz(int id)
         {
@@ -175,34 +273,6 @@ namespace KahootMvc.Areas.Teacher.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        public int CreatePinCode()
-        {
-            Random random = new Random();
-            int maxAttempts = 100; // Sonsuz döngüyü önlemek için maksimum deneme
-            int attempts = 0;
-
-            while (attempts < maxAttempts)
-            {
-                var pinCode = random.Next(100000, 1000000);
-                if (CheckPinCode(pinCode))
-                {
-                    _context.PinCodes.Add(new PinCode(pinCode));//Uygun pin kodunu pin kodu tablosuna kayıt
-                    _context.SaveChanges();
-                    return pinCode;
-                }
-                    
-
-                attempts++;
-            }
-            throw new InvalidOperationException("Uygun PIN kodu bulunamadı");// Umarım gerek kalmaz ama 
-        }
-
-        public bool CheckPinCode(int pincode)
-        {
-            var isUsed = _context.PinCodes.FirstOrDefault(x => x.Pin == pincode);
-            return isUsed == null; // Kullanılmamışsa true
         }
     }
 }

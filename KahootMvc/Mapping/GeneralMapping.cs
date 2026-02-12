@@ -16,10 +16,6 @@ namespace KahootMvc.Mapping
 
             CreateMap<Quiz, GetQuizInfoDto>().ReverseMap();
             CreateMap<Quiz,CreateQuizDto>().ReverseMap();
-
-            CreateMap<Session, CreateSessionDto>().ReverseMap();
-
-
             CreateMap<Answer, CreateAnswerDto>().ReverseMap();
         }
     }

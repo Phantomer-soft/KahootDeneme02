@@ -100,14 +100,14 @@
                                         <label for="quizCategory" class="form-label">Genel Kategori <span class="text-danger">*</span></label>
                                         <select class="form-select" id="quizCategory" name="Category" required>
                                             <option value="">Seçiniz...</option>
-                                            <option value="Genel Kültür">Genel Kültür</option>
-                                            <option value="Matematik">Matematik</option>
-                                            <option value="Tarih">Tarih</option>
-                                            <option value="Bilim">Bilim</option>
-                                            <option value="Teknoloji">Teknoloji</option>
-                                            <option value="Spor">Spor</option>
-                                            <option value="Sanat">Sanat</option>
-                                            <option value="Diğer">Diğer</option>
+                                            <option value="11111111-1111-1111-1111-111111111111">Genel Kültür</option>
+                                            <option value="22222222-2222-2222-2222-222222222222">Matematik</option>
+                                            <option value="33333333-3333-3333-3333-333333333333">Tarih</option>
+                                            <option value="44444444-4444-4444-4444-444444444444">Bilim</option>
+                                            <option value="55555555-5555-5555-5555-555555555555">Teknoloji</option>
+                                            <option value="66666666-6666-6666-6666-666666666666">Spor</option>
+                                            <option value="77777777-7777-7777-7777-777777777777">Sanat</option>
+                                            <option value="88888888-8888-8888-8888-888888888888">Diğer</option>
                                         </select>
                                     </div>
                                 </div>
@@ -417,6 +417,7 @@
                     window.location.href = "ogretmen.html";
                 } else {
                     const err = await response.text();
+                    console.log(quizData);
                     alert("Hata oluştu: " + err);
                 }
             } catch (err) {
