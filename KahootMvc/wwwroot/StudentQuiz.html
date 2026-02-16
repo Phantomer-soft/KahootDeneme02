@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğrenci - Quiz</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+        }
+        button {
+            width: 100%;
+            background: #43e97b;
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #38d66a;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .waiting {
+            text-align: center;
+            padding: 40px;
+        }
+        .waiting h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #43e97b;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .question-container {
+            margin: 20px 0;
+        }
+        .question-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .question-text {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .options {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+            color: #000;
+        }
+        .option-btn {
+            padding: 25px;
+            font-size: 20px;
+            border: 3px solid #ddd;
+            background: rgb(0, 0, 0);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 10px;
+            text-align: left;
+        }
+        .option-btn:hover:not(:disabled) {
+            border-color: #43e97b;
+            background: #f0fdf4;
+            transform: scale(1.02);
+        }
+        .option-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .option-btn.selected {
+            border-color: #43e97b;
+            background: #d1fae5;
+        }
+        .option-btn.correct {
+            border-color: #22c55e;
+            background: #dcfce7;
+        }
+        .option-btn.wrong {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+        .timer {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #667eea;
+        }
+        .timer.warning {
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .score-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .feedback {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+        .feedback.wrong {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🎮 Quiz Oyunu</h1>
+
+            <!-- Giriş Ekranı -->
+            <div id="loginSection">
+                <div class="form-group">
+                    <label>PIN Kodu:</label>
+                    <input type="text" id="pinCode" placeholder="Örn: 123456" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Kullanıcı ID:</label>
+                    <input type="text" id="username" placeholder="Kullanıcı Adi" value="">
+                </div>
+                <button onclick="joinSession()">Katıl</button>
+            </div>
+
+            <!-- Bekleme Ekranı -->
+            <div id="waitingSection" class="hidden">
+                <div class="waiting">
+                    <h2>⏳ Oyun Başlıyor...</h2>
+                    <div class="loader"></div>
+                    <p style="font-size: 18px; color: #666;">Öğretmen oyunu başlatana kadar bekleyin</p>
+                </div>
+            </div>
+
+            <!-- Oyun Ekranı -->
+            <div id="gameSection" class="hidden">
+                <div id="questionContainer"></div>
+                <div id="leaderboardSection" class="hidden"></div>
+            </div>
+
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        let connection;
+        let currentScore = 0;
+        let selectedAnswer = null;
+        let timerInterval;
+
+        // SignalR Bağlantısı
+        async function initSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7117/QuizHub")
+                .withAutomaticReconnect()
+                .build();
+
+            // Event Listeners
+            connection.on("SessionStarted", (message) => {
+                document.getElementById('waitingSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+                showStatus(message, 'success');
+            });
+            connection.on("SetSessionUser", (userId, sessionId) => {
+            SetSessionUser(userId, sessionId);
+            });
+
+            connection.on("AnswerReceived", (data) => {
+                showFeedback(data.IsCorrect);
+                currentScore = data.TotalScore;
+                document.getElementById('scoreDisplay').textContent = currentScore;
+            });
+
+            connection.on("EndSession", (leaderboard) => {
+                showStudentFinalResults(leaderboard);
+            });
+
+            connection.on("TimeUp", () => {
+                disableAnswers();
+                showStatus('⏰ Süre Doldu!', 'error');
+                stopTimer();
+                const container = document.getElementById('questionContainer');
+                const loadingMsg = document.createElement('div');
+                loadingMsg.className = 'status success';
+                loadingMsg.style.marginTop = '20px';
+                loadingMsg.textContent = '📊 Liderlik tablosu getiriliyor...';
+                container.appendChild(loadingMsg);
+            });
+
+            connection.on("UpdateLeaderboard", (leaderboard) => {
+                const container = document.getElementById('questionContainer');
+                const leaderboardDiv = document.getElementById('leaderboardSection');
+
+                // Soru alanını gizle, tablo alanını göster
+                container.classList.add('hidden');
+                leaderboardDiv.classList.remove('hidden');
+
+                let html = `
+                    <div class="card" style="box-shadow: none; background: #f8f9fa;">
+                        <h2>🏆 Liderlik Tablosu</h2>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #667eea;">
+                                    <th style="padding: 10px; text-align: left;">Sıra</th>
+                                    <th style="padding: 10px; text-align: left;">Kullanıcı</th>
+                                    <th style="padding: 10px; text-align: right;">Puan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${leaderboard.map((user, index) => `
+                                    <tr style="border-bottom: 1px solid #ddd; ${user.userName === document.getElementById('username').value ? 'background: #d1fae5; font-weight: bold;' : ''}">
+                                        <td style="padding: 12px; text-align: left;">${index + 1}.</td>
+                                        <td style="padding: 12px; text-align: left;">${user.userName}</td>
+                                        <td style="padding: 12px; text-align: right;">${user.score}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <p style="text-align: center; margin-top: 20px; color: #666;">Bir sonraki soru bekleniyor...</p>
+                    </div>
+                `;
+
+                leaderboardDiv.innerHTML = html;
+            });
+
+            // SendQuestion geldiğinde ekranı temizle (Yeni soruya geçiş için)
+            connection.on("SendQuestion", (data) => {
+                document.getElementById('leaderboardSection').classList.add('hidden');
+                document.getElementById('questionContainer').classList.remove('hidden');
+                displayQuestion(data);
+                startTimer(data.time);
+            });
+
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+            } catch (err) {
+                console.error(err);
+                showStatus("Bağlantı hatası: " + err, 'error');
+            }
+            connection.on("UserJoined", (data) => {
+                const joinedUser = data.username || data.Username; 
+                console.log(data);
+                console.log(joinedUser);
+                if (joinedUser) {
+                    participants.push(joinedUser);
+                    showStatus(`${joinedUser} katıldı!`, 'success');
+                    updateParticipantsList(participants.length);
+                }
+                else
+                    console.log("BACKEND BOS DONDU ");
+            });
+        }
+
+        async function joinSession() {
+            const pinCode = document.getElementById('pinCode').value;
+            const username = document.getElementById('username').value;
+
+            if (!pinCode || !username) {
+                showStatus('Lütfen tüm alanları doldurun!', 'error');
+                return;
+            }
+
+            try {
+                const response = await connection.invoke("Join", parseInt(pinCode), username);
+
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('waitingSection').classList.remove('hidden');
+
+                showStatus(`Hoş geldin ${response.username}!`, 'success'); 
+            } catch (err) {
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+
+        async function SetSessionUser(userId, sessionId) {
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("sessionId", sessionId);
+        }
+
+        // Soru Göster
+        function displayQuestion(data) {
+            selectedAnswer = null;
+            const container = document.getElementById('questionContainer');
+
+            const html = `
+                <div class="question-header">
+                    <div>Soru ${data.order}</div>
+                    <div class="timer" id="timer">${data.time}</div>
+                </div>
+
+                <div class="question-text">${data.text}</div>
+
+                <div class="options">
+                    ${data.answers.map((opt, idx) => `
+                        <button class="option-btn" onclick="selectAnswer('${opt.text}', this)">
+                            <strong>${String.fromCharCode(65 + idx)}:</strong> ${opt.text}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <button id="submitBtn" onclick="submitAnswer()" disabled>Cevabı Gönder</button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Cevap Seç
+        function selectAnswer(answer, button) {
+            // Önceki seçimi kaldır
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Yeni seçimi işaretle
+            button.classList.add('selected');
+            selectedAnswer = answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        // Cevabı Gönder
+        async function submitAnswer() {
+            if (!selectedAnswer) return;
+
+            try {
+                await connection.invoke("SubmitAnswer", localStorage.getItem("sessionId"), selectedAnswer);
+                disableAnswers();
+                document.getElementById('submitBtn').disabled = true;
+            } catch (err) {
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+
+        // Timer Başlat
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            const timerEl = document.getElementById('timer');
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+
+                if (timeLeft <= 5) {
+                    timerEl.classList.add('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    stopTimer();
+                }
+            }, 1000);
+        }
+
+        // Timer Durdur
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // Geri Bildirim Göster
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+            feedback.textContent = isCorrect ? '✅ Doğru Cevap! +Puan' : '❌ Yanlış Cevap';
+
+            document.getElementById('questionContainer').prepend(feedback);
+
+            setTimeout(() => feedback.remove(), 3000);
+        }
+
+        // Doğru Cevabı Göster
+        function showCorrectAnswer(correctAnswer) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                if (btn.textContent.includes(correctAnswer)) {
+                    btn.classList.add('correct');
+                } else if (btn.classList.contains('selected')) {
+                    btn.classList.add('wrong');
+                }
+            });
+        }
+
+        // Cevapları Devre Dışı Bırak
+        function disableAnswers() {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        function showStudentFinalResults(leaderboard) {
+            const container = document.getElementById('questionContainer');
+
+            // Öğrencinin kendi sırasını bul (username input'undan alıyoruz)
+            const myUsername = document.getElementById('username').value;
+            const myRank = leaderboard.findIndex(u => u.userName === myUsername) + 1;
+            const myScore = leaderboard.find(u => u.userName === myUsername)?.score || 0;
+
+            const html = `
+                <div style="text-align: center; padding: 40px;">
+                    <h2 style="font-size: 36px; margin-bottom: 20px;">🏁 Quiz Bitti!</h2>
+
+                    <div class="score-display" style="margin: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div style="font-size: 20px;">Toplam Puanın</div>
+                        <div class="score-number" style="font-size: 64px; font-weight: bold;">${myScore}</div>
+                        <div style="font-size: 18px; margin-top: 10px;">Genel Sıralaman: ${myRank}. </div>
+                    </div>
+
+                    ${myRank === 1 ? '<div style="font-size: 80px;">🏆</div><h3>ŞAMPİYON!</h3>' : ''}
+
+                    <button onclick="location.reload()" style="margin-top: 30px; background: #43e97b; color: white; border: none; padding: 15px 30px; border-radius: 8px; cursor: pointer;">
+                        Ana Sayfaya Dön
+                    </button>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            document.getElementById('leaderboardSection').classList.add('hidden'); // Tablo açıksa gizle
+        }
+
+        // Durum Mesajı
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            setTimeout(() => statusDiv.textContent = '', 8000);
+        }
+
+        // Sayfa yüklendiğinde
+        initSignalR();
+    </script>
+</body>
+</html>

@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizMaster | Öğrenci</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Modern Card Tasarımı */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 32px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* Form Elemanları */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #94a3b8;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            font-size: 1rem;
+            color: #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+        }
+
+        input::placeholder {
+            color: #475569;
+        }
+
+        /* Modern Butonlar */
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 30px -10px rgba(96, 165, 250, 0.5);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            background: #475569;
+        }
+
+        /* Bekleme Ekranı */
+        .waiting {
+            text-align: center;
+            padding: 60px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .waiting h2 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 32px;
+        }
+
+        .waiting p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        /* Modern Loader */
+        .loader {
+            width: 80px;
+            height: 80px;
+            margin: 30px auto;
+            border: 4px solid rgba(96, 165, 250, 0.1);
+            border-top: 4px solid #60a5fa;
+            border-right: 4px solid #a78bfa;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Soru Container */
+        .question-header {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 30px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .timer {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+        }
+
+        .timer.warning {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 1s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .question-text {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 30px 0;
+            text-align: center;
+            line-height: 1.4;
+            color: #f1f5f9;
+        }
+
+        /* Seçenekler */
+        .options {
+            display: grid;
+            gap: 16px;
+            margin: 30px 0;
+        }
+
+        .option-btn {
+            padding: 20px 24px;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option-btn:hover::before {
+            left: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+            transform: translateX(5px);
+            box-shadow: 0 10px 20px -10px rgba(96, 165, 250, 0.3);
+        }
+
+        .option-btn.selected {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.2);
+            box-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+        }
+
+        .option-btn.correct {
+            border-color: #4ade80;
+            background: rgba(74, 222, 128, 0.2);
+        }
+
+        .option-btn.wrong {
+            border-color: #f87171;
+            background: rgba(248, 113, 113, 0.2);
+        }
+
+        .option-btn strong {
+            color: #60a5fa;
+            margin-right: 12px;
+            font-size: 1.3rem;
+        }
+
+        /* Liderlik Tablosu */
+        #leaderboardSection .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: 20px;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            color: #e2e8f0;
+        }
+
+        tr.highlight td {
+            background: rgba(96, 165, 250, 0.2);
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        /* Skor Gösterimi */
+        .score-display {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .score-number {
+            font-size: 6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin: 20px 0;
+            text-shadow: 0 0 50px rgba(96, 165, 250, 0.5);
+        }
+
+        /* Feedback Mesajları */
+        .feedback {
+            padding: 16px 24px;
+            border-radius: 100px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.correct {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid #4ade80;
+            color: #4ade80;
+        }
+
+        .feedback.wrong {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid #f87171;
+            color: #f87171;
+        }
+
+        .status {
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .status.success {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid #4ade80;
+            color: #4ade80;
+        }
+
+        .status.error {
+            background: rgba(248, 113, 113, 0.2);
+            border: 1px solid #f87171;
+            color: #f87171;
+        }
+
+        /* Yeni: Bekleme Overlay'i */
+        .waiting-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .waiting-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .waiting-card h3 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .waiting-card p {
+            color: #94a3b8;
+            margin: 20px 0;
+            font-size: 1.1rem;
+        }
+
+        .waiting-card .mini-loader {
+            width: 50px;
+            height: 50px;
+            margin: 20px auto;
+            border: 3px solid rgba(96, 165, 250, 0.1);
+            border-top: 3px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .waiting-card .success-icon {
+            font-size: 4rem;
+            margin: 20px 0;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Şampiyon Animasyonu */
+        .champion {
+            font-size: 5rem;
+            animation: bounce 1s ease infinite;
+            margin: 20px 0;
+        }
+
+        /* Responsive Tasarım */
+        @media (max-width: 768px) {
+            .card {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .timer {
+                font-size: 3rem;
+            }
+
+            .question-text {
+                font-size: 1.5rem;
+            }
+
+            .option-btn {
+                padding: 16px 20px;
+                font-size: 1rem;
+            }
+
+            .score-number {
+                font-size: 4rem;
+            }
+        }
+
+        /* Modern Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+        }
+
+        /* PIN Kodu Özel Stili */
+        #pinCode {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            text-align: center;
+        }
+
+        /* Oyun Bitti Ekranı */
+        .game-over {
+            text-align: center;
+        }
+
+        .game-over h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .game-over button {
+            max-width: 300px;
+            margin: 30px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>✨ QuizMaster</h1>
+
+            <!-- Giriş Ekranı -->
+            <div id="loginSection">
+                <div class="form-group">
+                    <label>🔐 Oda Kodu</label>
+                    <input type="text" id="pinCode" placeholder="6 haneli kodu girin" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>👤 Kullanıcı Adı</label>
+                    <input type="text" id="username" placeholder="Sana Ne Diyelim ??">
+                </div>
+                <button onclick="joinSession()">🎮 Oyuna Katıl</button>
+            </div>
+
+            <!-- Bekleme Ekranı (Oyun başlamasını beklerken) -->
+            <div id="waitingSection" class="hidden">
+                <div class="waiting">
+                    <h2>🎯 Oyun Hazırlanıyor</h2>
+                    <div class="loader"></div>
+                    <p>Öğretmenin oyunu başlatmasını bekliyoruz...</p>
+                    <p style="font-size: 0.9rem; margin-top: 20px;">⚡ Bilgi: Sorular ekranda belirecek</p>
+                </div>
+            </div>
+
+            <!-- Oyun Ekranı -->
+            <div id="gameSection" class="hidden">
+                <div id="questionContainer"></div>
+                <div id="leaderboardSection" class="hidden"></div>
+            </div>
+
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <div id="waitingOverlay" class="waiting-overlay hidden">
+        <div class="waiting-card">
+            <div id="waitingContent">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let connection;
+        let currentScore = 0;
+        let selectedAnswer = null;
+        let timerInterval;
+        let participants = [];
+
+        // Bekleme overlay'ini göster
+        function showWaitingOverlay(type, message) {
+            const overlay = document.getElementById('waitingOverlay');
+            const content = document.getElementById('waitingContent');
+
+            if (type === 'waiting') {
+                content.innerHTML = `
+                    <h3>⏳ Bekliyoruz</h3>
+                    <div class="mini-loader"></div>
+                    <p>${message || 'Diğer öğrenciler cevaplıyor...'}</p>
+                `;
+            } else if (type === 'success') {
+                content.innerHTML = `
+                    <h3>✅ Başarılı</h3>
+                    <div class="success-icon">🎉</div>
+                    <p>${message || 'Cevabınız alındı!'}</p>
+                `;
+            } else if (type === 'loading') {
+                content.innerHTML = `
+                    <h3>📊 Sonuçlar</h3>
+                    <div class="mini-loader"></div>
+                    <p>${message || 'Liderlik tablosu hazırlanıyor...'}</p>
+                `;
+            }
+
+            overlay.classList.remove('hidden');
+        }
+
+        // Bekleme overlay'ini gizle
+        function hideWaitingOverlay() {
+            document.getElementById('waitingOverlay').classList.add('hidden');
+        }
+
+        async function initSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7117/QuizHub")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("SessionStarted", (message) => {
+                document.getElementById('waitingSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+                showStatus('🚀 Oyun başladı!', 'success');
+            });
+
+            connection.on("SetSessionUser", (userId, sessionId) => {
+                SetSessionUser(userId, sessionId);
+            });
+
+
+            connection.on("EndSession", (leaderboard) => {
+                hideWaitingOverlay();
+                showStudentFinalResults(leaderboard);
+            });
+
+            connection.on("TimeUp", () => {
+                hideWaitingOverlay();
+                disableAnswers();
+                showStatus('⏰ Süre doldu!', 'error');
+                stopTimer();
+
+                // Süre dolduğunda sonuçlar bekleniyor mesajı
+                showWaitingOverlay('loading', 'Süre doldu! Sonuçlar hesaplanıyor...');
+            });
+
+            connection.on("UpdateLeaderboard", (leaderboard) => {
+                hideWaitingOverlay();
+
+                const container = document.getElementById('questionContainer');
+                const leaderboardDiv = document.getElementById('leaderboardSection');
+                const username = document.getElementById('username').value;
+
+                container.classList.add('hidden');
+                leaderboardDiv.classList.remove('hidden');
+
+                let html = `
+                    <div class="card">
+                        <h2>🏆 Liderlik Tablosu</h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Sıra</th>
+                                    <th>Oyuncu</th>
+                                    <th style="text-align: right;">Puan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${leaderboard.map((user, index) => `
+                                    <tr class="${user.userName === username ? 'highlight' : ''}">
+                                        <td>
+                                            ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`}
+                                        </td>
+                                        <td>${user.userName}</td>
+                                        <td style="text-align: right; font-weight: 600;">${user.score}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                        <p style="text-align: center; margin-top: 30px; color: #94a3b8;">
+                            ⏳ Sonraki soru bekleniyor...
+                        </p>
+                    </div>
+                `;
+
+                leaderboardDiv.innerHTML = html;
+            });
+
+            connection.on("SendQuestion", (data) => {
+                hideWaitingOverlay();
+                document.getElementById('leaderboardSection').classList.add('hidden');
+                document.getElementById('questionContainer').classList.remove('hidden');
+                displayQuestion(data);
+                startTimer(data.time);
+            });
+
+            connection.on("UserJoined", (data) => {
+                const joinedUser = data.username || data.Username;
+                if (joinedUser) {
+                    participants.push(joinedUser);
+                    showStatus(`✨ ${joinedUser} katıldı!`, 'success');
+                }
+            });
+
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+            } catch (err) {
+                console.error(err);
+                showStatus("Bağlantı hatası: " + err, 'error');
+            }
+        }
+
+        async function joinSession() {
+            const pinCode = document.getElementById('pinCode').value;
+            const username = document.getElementById('username').value;
+
+            if (!pinCode || !username) {
+                showStatus('Lütfen tüm alanları doldurun!', 'error');
+                return;
+            }
+
+            if (pinCode.length !== 6) {
+                showStatus('PIN kodu 6 haneli olmalı!', 'error');
+                return;
+            }
+
+            try {
+                const response = await connection.invoke("Join", parseInt(pinCode), username);
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('waitingSection').classList.remove('hidden');
+                showStatus(`🎉 Hoş geldin ${response.username}!`, 'success');
+            } catch (err) {
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+
+        async function SetSessionUser(userId, sessionId) {
+            localStorage.setItem("userId", userId);
+            localStorage.setItem("sessionId", sessionId);
+        }
+
+        function displayQuestion(data) {
+            selectedAnswer = null;
+            const container = document.getElementById('questionContainer');
+
+            const html = `
+                <div class="question-header">
+                    <div style="font-size: 1.2rem; color: #94a3b8;">Soru ${data.order}</div>
+                    <div class="timer" id="timer">${data.time}</div>
+                </div>
+
+                <div class="question-text">${data.text}</div>
+
+                <div class="options">
+                    ${data.answers.map((opt, idx) => `
+                        <button class="option-btn" onclick="selectAnswer('${opt.text}', this)">
+                            <strong>${String.fromCharCode(65 + idx)}</strong>
+                            ${opt.text}
+                        </button>
+                    `).join('')}
+                </div>
+
+                <button id="submitBtn" onclick="submitAnswer()" disabled>📤 Cevapla</button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function selectAnswer(answer, button) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            button.classList.add('selected');
+            selectedAnswer = answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        async function submitAnswer() {
+            if (!selectedAnswer) return;
+
+            try {
+                // Cevap gönderildi, bekleme ekranını göster
+                showWaitingOverlay('waiting', 'Cevabınız gönderiliyor...');
+
+                await connection.invoke("SubmitAnswer", localStorage.getItem("sessionId"), selectedAnswer);
+
+                // Cevap gönderildikten sonra "bekleniyor" mesajı
+                setTimeout(() => {
+                    showWaitingOverlay('waiting', 'Diğer öğrenciler bekleniyor...');
+                }, 500);
+
+                disableAnswers();
+                document.getElementById('submitBtn').disabled = true;
+            } catch (err) {
+                hideWaitingOverlay();
+                showStatus('Hata: ' + err, 'error');
+            }
+        }
+
+        function startTimer(seconds) {
+            let timeLeft = seconds;
+            const timerEl = document.getElementById('timer');
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+
+                if (timeLeft <= 5) {
+                    timerEl.classList.add('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    stopTimer();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function showFeedback(isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
+            feedback.textContent = isCorrect ? '✅ Harika! Doğru cevap!' : '❌ Üzgünüm, yanlış cevap!';
+
+            document.getElementById('questionContainer').prepend(feedback);
+
+            setTimeout(() => feedback.remove(), 3000);
+        }
+
+        function disableAnswers() {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+
+        function showStudentFinalResults(leaderboard) {
+
+            const container = document.getElementById('questionContainer');
+            const leaderboardSection = document.getElementById('leaderboardSection');
+            const gameSection = document.getElementById('gameSection');
+            const myUsername = document.getElementById('username').value;
+
+            // Tüm bölümleri temizle ve düzenle
+            container.classList.remove('hidden');
+            leaderboardSection.classList.add('hidden');
+
+            gameSection.classList.remove('hidden');
+
+            const myRank = leaderboard.findIndex(u => u.userName === myUsername) + 1;
+            const myScore = leaderboard.find(u => u.userName === myUsername)?.score || 0;
+
+            const html = `
+                <div class="game-over" style="text-align: center; padding: 20px;">
+                    <h2 style="font-size: 3rem; margin-bottom: 30px; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        🎯 Oyun Tamamlandı!
+                    </h2>
+
+                    <div class="score-display" style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; padding: 40px; margin: 30px 0;">
+                        <div style="font-size: 1.2rem; color: #94a3b8; margin-bottom: 10px;">Toplam Puanın</div>
+                        <div style="font-size: 6rem; font-weight: 800; background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; margin: 20px 0;">
+                            ${myScore}
+                        </div>
+                        <div style="font-size: 1.5rem; color: #60a5fa; margin-top: 10px;">
+                            ${myRank}. sırada tamamladın!
+                        </div>
+                    </div>
+
+                    ${myRank === 1 ? `
+                        <div style="text-align: center; margin: 30px 0;">
+                            <div style="font-size: 5rem; animation: bounce 1s ease infinite; margin: 20px 0;">🏆</div>
+                            <h3 style="color: #fbbf24; font-size: 2rem; margin: 20px 0;">ŞAMPİYON!</h3>
+                        </div>
+                    ` : ''}
+
+                    <div style="display: flex; justify-content: center; margin-top: 40px;">
+                        <button onclick="location.reload()" style="max-width: 300px; padding: 16px 32px; background: linear-gradient(135deg, #60a5fa, #a78bfa); border: none; border-radius: 16px; color: white; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                            🔄 Yeni Oyuna Katıl
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            setTimeout(() => statusDiv.textContent = '', 5000);
+        }
+
+        // Sayfa yüklendiğinde
+        initSignalR();
+    </script>
+</body>
+</html>

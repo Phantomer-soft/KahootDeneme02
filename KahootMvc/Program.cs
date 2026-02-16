@@ -14,6 +14,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly()); // Pakette hata ald�m projeyi yaparken versiyonu kontrol edip d�zelttim �nceki versiyon 15.0 yeni => 13.0.1 s�k�nt� ��z�ld�
 builder.Services.AddDbContext<AppDbContext>(options =>options.UseMySql(connectionString,ServerVersion.AutoDetect(connectionString)));//sql server kullanarak ba�lant�y� sa�lad�m 
 builder.Services.AddScoped<Functions>();
+builder.Services.AddScoped<QuizTimerService>();
 builder.Services.AddSignalR();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.SetIsOriginAllowed(origin => true) // Tüm originlere izin ver

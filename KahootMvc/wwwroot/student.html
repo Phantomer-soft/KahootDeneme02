@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wahoot | Öğrenci</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1> WAHOOT</h1>
+
+            <!-- Giriş Ekranı -->
+            <div id="loginSection">
+                <div class="form-group">
+                    <label>🔐 Oda Kodu</label>
+                    <input type="text" id="pinCode" placeholder="6 haneli kodu girin" maxlength="6">
+                </div>
+                <div class="form-group">
+                    <label>👤 Kullanıcı Adı</label>
+                    <input type="text" id="username" placeholder="Sana Ne Diyelim ??">
+                </div>
+                <button onclick="quizApp.joinSession()">🎮 Oyuna Katıl</button>
+            </div>
+
+            <!-- Bekleme Ekranı (Oyun başlamasını beklerken) -->
+            <div id="waitingSection" class="hidden">
+                <div class="waiting">
+                    <h2>🎯 Oyun Hazırlanıyor</h2>
+                    <div class="loader"></div>
+                    <p>Öğretmenin oyunu başlatmasını bekliyoruz...</p>
+                    <p style="font-size: 0.9rem; margin-top: 20px;">⚡ Bilgi: Sorular ekranda belirecek</p>
+                </div>
+            </div>
+
+            <!-- Oyun Ekranı -->
+            <div id="gameSection" class="hidden">
+                <div id="questionContainer"></div>
+                <div id="leaderboardSection" class="hidden"></div>
+            </div>
+
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <!-- Bekleme Overlay'i -->
+    <div id="waitingOverlay" class="waiting-overlay hidden">
+        <div class="waiting-card">
+            <div id="waitingContent"></div>
+        </div>
+    </div>
+
+    <script src="js/script3.js"></script>
+</body>
+</html>

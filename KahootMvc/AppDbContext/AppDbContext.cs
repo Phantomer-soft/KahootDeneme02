@@ -17,6 +17,7 @@ namespace KahootMvc.AppContext
         public DbSet<LeaderBoard> LeaderBoards { get; set; }
         public DbSet<SessionUser> SessionUsers { get; set; }
         public DbSet<Token> Tokens { get; set; }
+        public DbSet<SessionLeaderboard> SessionLeaderboards { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
