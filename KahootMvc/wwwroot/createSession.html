@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğretmen - Quiz Yönetimi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .pin-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .pin-code {
+            font-size: 72px;
+            font-weight: bold;
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+        .participants {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .participant {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+        .leaderboard {
+            margin-top: 20px;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .leaderboard-item:nth-child(1) {
+            border-left-color: gold;
+            background: #fff9e6;
+        }
+        .leaderboard-item:nth-child(2) {
+            border-left-color: silver;
+            background: #f5f5f5;
+        }
+        .leaderboard-item:nth-child(3) {
+            border-left-color: #cd7f32;
+            background: #fff5e6;
+        }
+        .hidden {
+            display: none;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .current-question {
+            background: #e7f3ff;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .question-text {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .option {
+            padding: 20px;
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            text-align: center;
+        }
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+           <div id="createSessionSection">
+                <h1>🎓 Öğretmen Paneli</h1>
+                <h2>Quiz Oturumunu Başlat</h2>
+                <p style="margin-bottom: 20px; color: #666;">Seçili quiz için yeni bir oturum oluşturulacak.</p>
+                
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button onclick="createSession()" style="flex: 2;">
+                        Session Oluştur ve Başlat
+                    </button>
+                    <button onclick="goToHome()" style="flex: 1; background: #f5576c; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 20px;">🏠</span> Ana Sayfa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bekleme Ekranı -->
+            <div id="waitingSection" class="hidden">
+                <div class="pin-display">
+                    <h2>Öğrenciler Katılsın</h2>
+                    <div>Öğrenciler bu PIN kodunu girsin:</div>
+                    <div class="pin-code" id="pinCode">------</div>
+                    <div>Quiz: <span id="quizTitle"></span></div>
+                    <div>Toplam Soru: <span id="totalQuestions">0</span></div>
+                </div>
+
+                <h3>Katılımcılar (<span id="participantCount">0</span>)</h3>
+                <div class="participants" id="participantsList"></div>
+
+                <button onclick="startSession()" id="startButton" style="width: 100%; margin-top: 20px;">
+                    Oyunu Başlat
+                </button>
+            </div>
+
+            <!-- Oyun Ekranı -->
+            <div id="gameSection" class="hidden">
+                <div class="current-question" id="currentQuestionDisplay"></div>
+
+                <h3>Anlık Sıralama</h3>
+                <div class="leaderboard" id="liveLeaderboard"></div>
+
+                <button onclick="nextQuestion()" id="nextButton" style="width: 100%; margin-top: 20px;">
+                    Sonraki Soru
+                </button>
+            </div>
+            <div id="resultsSection" class="hidden">
+                <h2>🏆 Final Sonuçları</h2>
+                <div class="leaderboard" id="finalLeaderboard"></div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="location.reload()" style="flex: 1;">Yeni Session Başlat</button>
+                    <button onclick="goToHome()" style="flex: 1; background: #f5576c; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 20px;">🏠</span> Ana Sayfa
+                    </button>
+                </div>
+            </div>
+
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        let connection;
+        let currentPinCode;
+        let participants = [];
+
+        // SignalR Bağlantısı
+        async function initSignalR() {
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7117/QuizHub")
+                .withAutomaticReconnect()
+                .build();
+
+            // Event Listeners
+            connection.on("UserJoined", (data) => {
+                // Hem 'Username' hem 'username' ihtimalini kontrol et
+                const joinedUser = data.username || data.Username; 
+                console.log(data);
+                console.log(joinedUser);
+                if (joinedUser) {
+                    participants.push(joinedUser);
+                    showStatus(`${joinedUser} katıldı!`, 'success');
+                    updateParticipantsList(participants.length);
+                }
+                else
+                    console.log("BACKEND BOS DONDU ");
+            });
+            connection.on("UpdateLeaderboard", (leaderboard) => {
+                console.log("Sıralama güncellendi:", leaderboard);
+                updateLeaderboard(leaderboard); // Mevcut fonksiyonunuzu çağırıyoruz
+            });
+
+            connection.on("SetTeacherToken",(token)=>{
+                localStorage.setItem("teacherToken",token);
+            });
+            connection.on("SetTeacherId",(id)=>{
+                localStorage.setItem("teacherId",id);
+            });
+            connection.on("SetPinCode", (code) => {
+                currentPinCode = code; // Bu satırı ekle
+                document.getElementById('pinCode').innerText = code;
+                console.log("Oyun PIN Kodu: " + code);
+            });
+            connection.on("SetSessionId", (sessionId) => {
+                localStorage.setItem("SessionId",sessionId);
+            });
+            connection.on("SessionStarted", (message) => {
+                showStatus(message, 'success');
+                document.getElementById('waitingSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+            });
+
+            connection.on("SendQuestion", (data) => {
+                displayQuestion(data);
+                startTeacherTimer(data.TimeLimit || data.time);
+            });
+
+            connection.on("ShowResults", (data) => {
+                displayResults(data);
+            });
+
+            connection.on("EndSession", (leaderboard) => {
+                showFinalResults(leaderboard);
+            });
+
+            try {
+                await connection.start();
+                console.log("SignalR Connected");
+            } catch (err) {
+                console.error(err);
+                showStatus("Bağlantı hatası: " + err, 'error');
+            }
+        }
+        // Yardımcı fonksiyon: Listeye yeni bir isim eklemek için
+            function renderNewParticipant(data) {
+                const listContainer = document.getElementById('participant-list');
+                if (listContainer) {
+                    const userElement = document.createElement('div');
+                    userElement.id = `user-${data.connectionId}`; // ConnectionId'yi silme işlemleri için kullanabilirsin
+                    userElement.className = 'participant-item';
+                    userElement.textContent = data.username || data.Username;
+                    listContainer.appendChild(userElement);
+                }
+            }
+
+        async function createSession() {
+        const teacherId = localStorage.getItem("userid") || localStorage.getItem("teacherId");
+        const quizId = localStorage.getItem("selectedQuizId") || localStorage.getItem("quizId");
+
+        if (!teacherId || !quizId) {
+            showStatus('Hata: Öğretmen ID veya Quiz ID bulunamadı. Lütfen listeye geri dönüp tekrar deneyin.', 'error');
+            console.error("Eksik veri:", { teacherId, quizId });
+            return;
+        }
+
+        try {
+            await connection.invoke("CreateSession", teacherId, quizId);
+            
+            document.getElementById('createSessionSection').classList.add('hidden');
+            document.getElementById('waitingSection').classList.remove('hidden');
+            
+            showStatus('Session başarıyla oluşturuldu!', 'success');
+        } catch (err) {
+            console.error("Invoke hatası:", err);
+            showStatus('Oturum oluşturulurken bir hata oluştu: ' + err, 'error');
+        }
+    }
+
+    async function startSession() {
+        const token = localStorage.getItem("teacherToken");
+        const teacherId = localStorage.getItem("teacherId") || localStorage.getItem("userid");
+        const sessionId = localStorage.getItem("SessionId") || localStorage.getItem("sessionId");
+
+        if (participants.length === 0) {
+            showStatus('En az 1 katılımcı gerekli!', 'error');
+            return;
+        }
+        try {
+            await connection.invoke("StartSession", sessionId, teacherId, token);
+        } catch (err) {
+            showStatus('Hata: ' + err, 'error');
+        }
+    }
+
+        // Sonraki Soru
+        async function nextQuestion() {
+                const token = localStorage.getItem("teacherToken");
+                const teacherId = localStorage.getItem("teacherId");
+                const sessionId = localStorage.getItem("sessionId");
+                
+                // Butonu devre dışı bırak
+                const nextButton = document.getElementById('nextButton');
+                nextButton.disabled = true;
+                nextButton.style.opacity = '0.5';
+                nextButton.innerHTML = '⏳ Soru gönderiliyor...';
+                
+                try {
+                    await connection.invoke("NextQuestion", sessionId, teacherId, token);
+                } catch (err) {
+                    showStatus('Hata: ' + err, 'error');
+                    // Hata durumunda butonu tekrar aktif et
+                    nextButton.disabled = false;
+                    nextButton.style.opacity = '1';
+                    nextButton.innerHTML = 'Sonraki Soru';
+                }
+            }
+
+           let teacherTimerInterval;
+
+            function startTeacherTimer(seconds) {
+                    if (teacherTimerInterval) clearInterval(teacherTimerInterval);
+                    
+                    let timeLeft = seconds;
+                    const timerDisplay = document.getElementById('teacherTimerDisplay');
+                    const nextButton = document.getElementById('nextButton');
+                    
+                    // Timer başladığında buton devre dışı
+                    if (nextButton) {
+                        nextButton.disabled = true;
+                        nextButton.style.opacity = '0.5';
+                        nextButton.innerHTML = `⏱️ ${timeLeft} saniye kaldı...`;
+                    }
+                    
+                    teacherTimerInterval = setInterval(() => {
+                        timeLeft--;
+                        
+                        if (timerDisplay) {
+                            timerDisplay.innerText = timeLeft;
+                        }
+                        
+                        // Buton metnini güncelle
+                        if (nextButton && timeLeft > 0) {
+                            nextButton.innerHTML = `⏱️ ${timeLeft} saniye kaldı...`;
+                        }
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(teacherTimerInterval);
+                            
+                            // Süre bittiğinde butonu aktif et
+                            if (nextButton) {
+                                nextButton.disabled = false;
+                                nextButton.style.opacity = '1';
+                                nextButton.innerHTML = '➡️ Sonraki Soru';
+                            }
+                            
+                            // Timer display'i sıfırla
+                            if (timerDisplay) {
+                                timerDisplay.innerText = '0';
+                            }
+                        }
+                    }, 1000);
+                }
+
+            function displayQuestion(data) {
+    // Yeni soru geldiğinde butonu hazırla
+    const nextButton = document.getElementById('nextButton');
+    if (nextButton) {
+        nextButton.disabled = true;
+        nextButton.style.opacity = '0.5';
+        nextButton.innerHTML = `⏱️ ${data.TimeLimit || data.time} saniye kaldı...`;
+    }
+    
+    const questionHtml = `
+        <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="background: #667eea; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold;">
+                Soru ${data.QuestionNumber || data.order} / ${data.TotalQuestions || '?'}
+            </span>
+            <span id="teacherTimerDisplay" style="background: #f5576c; color: white; padding: 10px 20px; border-radius: 10px; font-size: 24px; font-weight: bold;">
+                ${data.TimeLimit || data.time}
+            </span>
+        </div>
+        <div class="question-text">${data.QuestionText || data.text}</div>
+
+        ${(data.ImageUrl) ? `<img src="${data.ImageUrl}" style="max-width: 100%; border-radius: 8px; margin-bottom: 15px;">` : ''}
+
+        <div class="options">
+            ${(data.Options || data.answers).map((opt, idx) => {
+                const text = typeof opt === 'string' ? opt : opt.text;
+                return `
+                    <div class="option" style="cursor: default; opacity: 0.9;">
+                        <strong>${String.fromCharCode(65 + idx)}:</strong> ${text}
+                    </div>
+                `;
+            }).join('')}
+        </div>
+
+        ${data.Explanation ? `
+            <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-left: 5px solid #ffecb5; color: #856404; border-radius: 8px;">
+                <strong>Not (Öğretmen Görür):</strong> ${data.Explanation}
+            </div>
+        ` : ''}
+    `;
+    
+    document.getElementById('currentQuestionDisplay').innerHTML = questionHtml;
+    
+    // Timer'ı başlat
+    if (data.TimeLimit || data.time) {
+        startTeacherTimer(data.TimeLimit || data.time);
+    }
+}
+
+        // Sonuçları Göster
+        function displayResults(data) {
+            const questionDiv = document.getElementById('currentQuestionDisplay');
+            const options = questionDiv.querySelectorAll('.option');
+
+            options.forEach(opt => {
+                if (opt.textContent.includes(data.CorrectAnswer)) {
+                    opt.classList.add('correct');
+                }
+            });
+
+            if (data.Explanation) {
+                questionDiv.innerHTML += `
+                    <div style="margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 8px;">
+                        <strong>Açıklama:</strong> ${data.Explanation}
+                    </div>
+                `;
+            }
+
+            updateLeaderboard(data.Leaderboard);
+        }
+
+        function updateLeaderboard(leaderboard) {
+            const html = leaderboard.map((user, index) => {
+                const name = user.userName || user.Username || "İsimsiz";
+                const score = user.score !== undefined ? user.score : (user.Score || 0);
+
+                return `
+                    <div class="leaderboard-item">
+                        <div>
+                            <span style="font-size: 24px; margin-right: 10px;">
+                                ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                            </span>
+                            <strong>${name}</strong>
+                        </div>
+                        <div style="font-size: 24px; font-weight: bold; color: #667eea;">
+                            ${score} puan
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            const leaderboardDiv = document.getElementById('liveLeaderboard');
+            if (leaderboardDiv) {
+                leaderboardDiv.innerHTML = html;
+            }
+        }
+        function goToHome() {
+            localStorage.removeItem("selectedQuizId");
+            localStorage.removeItem("quizId");
+            localStorage.removeItem("SessionId");
+            window.location.href = 'ogretmen.html'; 
+}
+        function showFinalResults(leaderboard) {
+            document.getElementById('gameSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+
+            const html = leaderboard.map((user, index) => `
+                <div class="leaderboard-item">
+                    <div>
+                        <span style="font-size: 32px; margin-right: 10px;">
+                            ${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}
+                        </span>
+                        <strong style="font-size: 20px;">${user.userName}</strong>
+                    </div>
+                    <div style="font-size: 28px; font-weight: bold; color: #667eea;">
+                        ${user.score} puan
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('finalLeaderboard').innerHTML = html;
+
+            // Kazananı duyur (Listenin ilk elemanı)
+            if (leaderboard.length > 0) {
+                showStatus(`🎉 Quiz Tamamlandı! Kazanan: ${leaderboard[0].userName}`, 'success');
+            }
+        }
+
+        // Katılımcı Listesi Güncelle
+        function updateParticipantsList(count) {
+            document.getElementById('participantCount').textContent = count;
+            const html = participants.map(p => `
+                <div class="participant">
+                    <div style="font-size: 40px;">👤</div>
+                    <div style="margin-top: 8px; font-weight: 600;">${p}</div>
+                </div>
+            `).join('');
+            document.getElementById('participantsList').innerHTML = html;
+        }
+
+        // Durum Mesajı
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            setTimeout(() => statusDiv.textContent = '', 5000);
+        }
+
+        // Sayfa yüklendiğinde
+        initSignalR();
+    </script>
+</body>
+</html>
