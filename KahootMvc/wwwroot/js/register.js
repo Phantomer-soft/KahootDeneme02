@@ -33,6 +33,7 @@
             success: function (response) {
                 if (response.success) {
                     alert("Kayıt başarılı, giriş yapabilirsiniz.");
+                    showLogin();
                     $("#ad, #soyad, #kullaniciAdi, #e-mail, #sifre, #sifre-tekrar").val("");
                 } else {
                     alert("Kayıt başarısız: " + response.message);

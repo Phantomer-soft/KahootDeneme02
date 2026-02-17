@@ -331,14 +331,13 @@ public class QuizHub : Hub
     }
     private int CalculatePoints(int basePoint, int elapsedSeconds, int maxTimeSeconds)
     {
-        // dogru cevapta surede sikinti oluyr 
-        if (elapsedSeconds >= maxTimeSeconds+1)
+        if (elapsedSeconds > maxTimeSeconds)
             return 0;
-        var timePercentageLeft = (maxTimeSeconds - elapsedSeconds) / (double)maxTimeSeconds;
-        
-        var bonusMultiplier = timePercentageLeft; 
-        var calculatedPoint = (int)(basePoint * bonusMultiplier);
-        return calculatedPoint;
+        double timePercentageLeft = (double)(maxTimeSeconds - elapsedSeconds) / maxTimeSeconds;
+        double maxBonusRate = 0.40;
+        double bonusMultiplier = timePercentageLeft * maxBonusRate; 
+        int totalPoint = (int)(basePoint * (1 + bonusMultiplier));
+        return totalPoint;
     }
     
 }

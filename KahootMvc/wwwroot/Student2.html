@@ -656,7 +656,6 @@
                 SetSessionUser(userId, sessionId);
             });
 
-
             connection.on("EndSession", (leaderboard) => {
                 hideWaitingOverlay();
                 showStudentFinalResults(leaderboard);
@@ -668,7 +667,6 @@
                 showStatus('⏰ Süre doldu!', 'error');
                 stopTimer();
 
-                // Süre dolduğunda sonuçlar bekleniyor mesajı
                 showWaitingOverlay('loading', 'Süre doldu! Sonuçlar hesaplanıyor...');
             });
 
@@ -854,16 +852,6 @@
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
-        }
-
-        function showFeedback(isCorrect) {
-            const feedback = document.createElement('div');
-            feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
-            feedback.textContent = isCorrect ? '✅ Harika! Doğru cevap!' : '❌ Üzgünüm, yanlış cevap!';
-
-            document.getElementById('questionContainer').prepend(feedback);
-
-            setTimeout(() => feedback.remove(), 3000);
         }
 
         function disableAnswers() {

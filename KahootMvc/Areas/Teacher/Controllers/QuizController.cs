@@ -116,7 +116,7 @@ namespace KahootMvc.Areas.Teacher.Controllers
         {
             var userGuid = Guid.Parse(userid);
             var list = await _context.Quizzes
-                .Where(x => x.UserId == userGuid)
+                .Where(x => x.UserId == userGuid && x.IsActive)
                 .Select(x => new GetQuizInfoDto
                 {
                     QuizId = x.Id,
@@ -244,12 +244,17 @@ public async Task<IActionResult> UpdateQuiz(
     await _context.SaveChangesAsync();
     return Ok();
 }
-        [HttpGet]
-        public async Task<IActionResult> DeleteQuiz([FromHeader] string userId, string quizId)
+        [HttpDelete] // Silme işlemi için HttpDelete daha uygundur
+        public async Task<IActionResult> DeleteQuiz([FromHeader] string userId, [FromQuery] string quizId) // quizId'nin nereden geleceği netleştirildi
         {
             var userid = Guid.Parse(userId);
-            var user = _context.Users.FirstOrDefault(u=> u.Id == userid);
-            var quiz = await _context.Quizzes.FindAsync(quizId);
+            var user = _context.Users.FirstOrDefault(u => u.Id == userid);
+    
+            // quizId null kontrolü eklenmeli veya Guid/Int dönüşümü yapılmalı
+            var quiz = await _context.Quizzes.FirstOrDefaultAsync(q=> q.Id == Guid.Parse(quizId));
+
+            if (quiz == null) return NotFound(); // Quiz bulunamadıysa hata dönmeli
+
             if (quiz.UserId == user.Id)
             {
                 quiz.IsActive = false;
@@ -261,18 +266,6 @@ public async Task<IActionResult> UpdateQuiz(
             {
                 return Unauthorized();
             }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteQuiz(int id)
-        {
-            var quiz = await _context.Quizzes.FindAsync(id);
-            if (quiz == null) return NotFound();
-
-            _context.Quizzes.Remove(quiz);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
     }
 }

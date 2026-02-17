@@ -56,7 +56,31 @@
     transform: translateX(100%);
 }
 
+.join-button button {
+    background-color: #46178f; /* Kahoot tarzı mor tonu */
+    color: white;
+    font-size: 18px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Geçiş efekti */
+    box-shadow: 0 4px 0 #3c2278; /* Alt gölge ile derinlik */
+    margin-top: 20px;
+}
 
+/* Mouse ile üzerine gelince (Hover) */
+.join-button button:hover {
+    background-color: #5a20b3;
+    transform: translateY(-2px); /* Hafif yukarı kalkma */
+    box-shadow: 0 6px 0 #2e0f5e;
+}
+
+/* Butona tıklandığı an (Active) */
+.join-button button:active {
+    transform: translateY(2px); /* Aşağı basılma efekti */
+    box-shadow: 0 2px 0 #2e0f5e;
+}
 
 /*geçişte değişen metinler için css*/
 

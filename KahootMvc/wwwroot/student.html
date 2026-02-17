@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wahoot | Öğrenci</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Öğrenci - Quiz</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <link rel="stylesheet" href="css/student.css">
 </head>
 <body>
     <div class="container">
         <div class="card">
-            <h1> WAHOOT</h1>
-
+            <div class="back-to-home">
+                <a href="index.html" class="home-btn">🏠 Anasayfa</a>
+            </div>
+            <h1>🎮 Quiz Oyunu</h1>
+            
             <!-- Giriş Ekranı -->
             <div id="loginSection">
                 <div class="form-group">
-                    <label>🔐 Oda Kodu</label>
-                    <input type="text" id="pinCode" placeholder="6 haneli kodu girin" maxlength="6">
+                    <label>PIN Kodu:</label>
+                    <input type="text" id="pinCode" placeholder="Örn: 123456" maxlength="6">
                 </div>
                 <div class="form-group">
-                    <label>👤 Kullanıcı Adı</label>
-                    <input type="text" id="username" placeholder="Sana Ne Diyelim ??">
+                    <label>Kullanıcı Adı:</label>
+                    <input type="text" id="username" placeholder="Kullanıcı Adınız">
                 </div>
-                <button onclick="quizApp.joinSession()">🎮 Oyuna Katıl</button>
+                <button onclick="quizApp.joinSession()">Katıl</button>
             </div>
 
-            <!-- Bekleme Ekranı (Oyun başlamasını beklerken) -->
+            <!-- Bekleme Ekranı -->
             <div id="waitingSection" class="hidden">
                 <div class="waiting">
-                    <h2>🎯 Oyun Hazırlanıyor</h2>
+                    <h2>⏳ Oyun Başlıyor...</h2>
                     <div class="loader"></div>
-                    <p>Öğretmenin oyunu başlatmasını bekliyoruz...</p>
-                    <p style="font-size: 0.9rem; margin-top: 20px;">⚡ Bilgi: Sorular ekranda belirecek</p>
+                    <p style="font-size: 18px; color: #666;">Öğretmen oyunu başlatana kadar bekleyin</p>
                 </div>
             </div>
 
@@ -41,14 +43,15 @@
                 <div id="leaderboardSection" class="hidden"></div>
             </div>
 
+            <!-- Status Mesajları -->
             <div id="status"></div>
         </div>
     </div>
 
     <!-- Bekleme Overlay'i -->
-    <div id="waitingOverlay" class="waiting-overlay hidden">
-        <div class="waiting-card">
-            <div id="waitingContent"></div>
+    <div id="waitingOverlay" class="overlay hidden">
+        <div class="overlay-content" id="waitingContent">
+            <!-- İçerik JavaScript ile doldurulacak -->
         </div>
     </div>
 

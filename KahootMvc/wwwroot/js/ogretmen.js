@@ -102,7 +102,7 @@ async function loadQuizzes() {
                     <span class="badge">📝 ${questionCount} Soru</span>
                 </div>
                 <div class="quiz-actions">
-                    <button class="btn btn-success" onclick="createSession('${quizId}')">▶️ Başlat</button>
+                    <button class="btn btn-success" onclick="localStorage.setItem('selectedQuizId', '${quizId}'); window.location.href='createSession.html'">▶️ Başlat</button>
                     <button class="btn btn-warning" onclick="editQuiz('${quizId}')">✏️ Düzenle</button>
                     <button class="btn btn-danger" onclick="deleteQuiz('${quizId}')">🗑️ Sil</button>
                 </div>
@@ -204,22 +204,22 @@ async function deleteQuiz(quizId) {
                 return;
             }
             
-            const response = await fetch(`/teacher/quiz/DeleteQuiz`, {
-                method: 'GET',
+            // quizId, URL sonuna query string olarak eklendi (?quizId=...)
+            const response = await fetch(`/teacher/quiz/DeleteQuiz?quizId=${quizId}`, {
+                method: 'DELETE', // GET yerine DELETE kullanıldı
                 headers: {
                     'Content-Type': 'application/json',
-                    'userId': userId,
-                    'quizId': quizId
+                    'userId': userId // userId Header'da kalabilir
                 }
             });
             
             if (response.ok) {
                 alert('Quiz başarıyla silindi!');
-                await loadQuizzes(); // Listeyi yeniden yükle
+                await loadQuizzes();
             } else {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Quiz silinemedi');
-                console.log(errorData);
+                // Backend'den JSON dönmeyebilir (sadece Ok() veya Unauthorized()), bu yüzden kontrol ekledik
+                const errorMessage = response.status === 401 ? 'Yetkiniz yok' : 'Quiz silinemedi';
+                throw new Error(errorMessage);
             }
         }
         catch (error) {
