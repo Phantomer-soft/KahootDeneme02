@@ -123,7 +123,7 @@ async function loadQuizzes() {
 }
 async function initSignalR() {
             connection = new signalR.HubConnectionBuilder()
-                .withUrl("https://localhost:7117/QuizHub")
+                .withUrl("/QuizHub")
                 .withAutomaticReconnect()
                 .build();
 

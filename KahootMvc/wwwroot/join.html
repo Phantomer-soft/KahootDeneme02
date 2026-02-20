@@ -341,7 +341,7 @@
 <script>
 
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("https://localhost:7117/QuizHub")
+    .withUrl("/QuizHub")
     .build();
 connection.on("UserJoined", user => {
     console.log("Kullanici katildi : "+user);
