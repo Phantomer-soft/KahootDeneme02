@@ -274,7 +274,7 @@
                 console.log("Oyun PIN Kodu: " + code);
             });
             connection.on("SetSessionId", (sessionId) => {
-                localStorage.setItem("SessionId",sessionId);
+                localStorage.setItem("sessionId",sessionId);
             });
             connection.on("SessionStarted", (message) => {
                 showStatus(message, 'success');
