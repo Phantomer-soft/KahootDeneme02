@@ -23,7 +23,7 @@ public class QuizHub : Hub
 
     // ek gelistirme => kullanicilara settoken yapabilirim ama suan degil 
     public async Task<SessionUser> Join(int pinCode, string username) // Dönüş tipi eklendi
-    {
+    { 
         var sessionInfo = _context.Sessions.FirstOrDefault(s => s.PinCode == pinCode);
         if (sessionInfo is { IsEnded: false })
         {
@@ -313,7 +313,7 @@ public class QuizHub : Hub
                             if (elapsedSeconds < maxTimeSeconds)
                             {
                                 calculatedPoint = CalculatePoints(basePoint, elapsedSeconds, maxTimeSeconds);
-                                sender.Point += (calculatedPoint+basePoint);
+                                sender.Point += calculatedPoint;
                             }
                         }
                         _context.SaveChanges();
