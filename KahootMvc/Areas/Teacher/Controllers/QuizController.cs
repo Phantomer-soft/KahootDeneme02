@@ -197,7 +197,7 @@ public async Task<IActionResult> UpdateQuiz(
                 Text = qDto.Text,
                 Time = qDto.Time,
                 Point = qDto.Point,
-                Order = quiz.Questions.Count,
+                Order = quiz.Questions.Count+1, // buradayim 
                 Answers = new List<Answer>()
             };
 

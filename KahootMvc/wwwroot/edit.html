@@ -106,7 +106,7 @@ let questionIndex = 0;
 function addQuestion(data = null) {
     const clone = questionTemplate.content.cloneNode(true);
     const wrapper = clone.querySelector('.question-wrapper');
-    const localIndex = questionIndex++;
+    const localIndex = questionIndex++; 
 
     if (data) {
         wrapper.querySelector('.question-id').value = data.id;
