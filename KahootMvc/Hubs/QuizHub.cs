@@ -306,7 +306,7 @@ public class QuizHub : Hub
                             var elapsedTime = answerTime - questionStartTime.Value;
                             var elapsedSeconds = (int)elapsedTime.TotalSeconds;
             
-                            var maxTimeSeconds = question.Time * 60;
+                            var maxTimeSeconds = question.Time;
                             var basePoint = question.Point;
                             
                             int calculatedPoint = 0;
