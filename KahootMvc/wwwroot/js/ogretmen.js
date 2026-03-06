@@ -171,7 +171,7 @@ async function createSession(quizId) {
                     alert("session olusturuldu");
                 showStatus('Session başarıyla oluşturuldu!', 'success');
             } catch (err) {
-                showStatus('Hata: ' + err, 'error');
+                showStatus('Hata: Lütfen Sayfayı Yenileyip Tekrar Deneyiniz');
             }
         }
 // Oyunu Başlat

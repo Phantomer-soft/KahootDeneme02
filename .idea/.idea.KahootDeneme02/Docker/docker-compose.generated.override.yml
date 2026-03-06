@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+version: "3.9"
+services:
+  api:
+    build:
+      context: "/home/sero/Desktop/PcYedekleri/repos/KahootDeneme02/KahootMvc"
+      dockerfile: "Dockerfile"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net6.0/KahootMvc.dll"
+    environment:
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net6.0/KahootMvc.staticwebassets.runtime.CT.json"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "kahootmvc:dev"
+    ports: []
+    volumes:
+    - "/home/sero/Desktop/PcYedekleri/repos/KahootDeneme02/KahootMvc:/app:rw"
+    - "/home/sero/Desktop/PcYedekleri/repos/KahootDeneme02:/src:rw"
+    - "/home/sero/.nuget/packages:/root/.nuget/packages"
+    working_dir: "/app"
