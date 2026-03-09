@@ -22,7 +22,6 @@ services:
     volumes:
       - mysqldata:/var/lib/mysql
     restart: always
-
   phpmyadmin:
     image: phpmyadmin:latest
     environment:
