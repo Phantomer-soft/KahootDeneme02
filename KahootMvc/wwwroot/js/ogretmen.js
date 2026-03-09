@@ -53,7 +53,7 @@ async function loadQuizzes() {
 
     try {
         const userId = localStorage.getItem("userid");
-        localStorage.removeItem("editQuiz");
+        sessionStorage.removeItem("editQuiz");
 
         if (!userId) {
             throw new Error("UserId localStorage'da yok");
@@ -102,7 +102,7 @@ async function loadQuizzes() {
                     <span class="badge">📝 ${questionCount} Soru</span>
                 </div>
                 <div class="quiz-actions">
-                    <button class="btn btn-success" onclick="localStorage.setItem('selectedQuizId', '${quizId}'); window.location.href='createSession.html'">▶️ Başlat</button>
+                    <button class="btn btn-success" onclick="sessionStorage.setItem('selectedQuizId', '${quizId}'); window.location.href='createSession.html'">▶️ Başlat</button>
                     <button class="btn btn-warning" onclick="editQuiz('${quizId}')">✏️ Düzenle</button>
                     <button class="btn btn-danger" onclick="deleteQuiz('${quizId}')">🗑️ Sil</button>
                 </div>
@@ -163,9 +163,9 @@ async function initSignalR() {
 //odayı olustur 
 async function createSession(quizId) {
             initSignalR();
-            const teacherId = localStorage.getItem("teacherId");
+            const UserId = localStorage.getItem("userid");
             try {
-                const response = await connection.invoke("CreateSession", teacherId, quizId);
+                const response = await connection.invoke("CreateSession", UserId, quizId);
 
                 if(response.status)
                     alert("session olusturuldu");
@@ -191,7 +191,7 @@ async function createSession(quizId) {
 
 function editQuiz(quizId) {
     window.location.href = `/edit.html`;
-    localStorage.setItem("editQuiz",quizId)
+    sessionStorage.setItem("editQuiz",quizId)
 }
 
 async function deleteQuiz(quizId) {

@@ -94,10 +94,9 @@ const quizApp = {
 
         try {
             await this.connection.start();
-            console.log("SignalR Connected");
+            this.showStatus("Bağlantı Başarılı",'success')
         } catch (err) {
-            console.error(err);
-            this.showStatus("Bağlantı hatası: " + err, 'error');
+            this.showStatus("Bağlantı hatası ",'error');
         }
     },
 
@@ -312,11 +311,15 @@ const quizApp = {
     },
 
     showStatus: function(message, type) {
-        const statusDiv = document.getElementById('status');
-        statusDiv.className = `status ${type}`;
-        statusDiv.textContent = message;
-        setTimeout(() => statusDiv.textContent = '', 5000);
-    }
+    const statusDiv = document.getElementById('status');
+    statusDiv.className = `status ${type}`;
+    statusDiv.textContent = message;
+    
+    setTimeout(() => {
+        statusDiv.textContent = '';
+        statusDiv.className = 'status'; 
+    }, 5000); 
+}
 };
 
 // Uygulamayı başlat

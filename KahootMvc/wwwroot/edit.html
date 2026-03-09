@@ -84,7 +84,7 @@
 let questionIndex = 0;
 
    async function loadQuiz() {
-    const quizIdParam = localStorage.getItem("editQuiz");
+    const quizIdParam = sessionStorage.getItem("editQuiz");
     const res = await fetch(`/teacher/quiz/getquiz?id=${quizIdParam}`);
     const quiz = await res.json();
 
@@ -191,8 +191,8 @@ async function submitEdit() {
         },
         body: JSON.stringify(quiz)
     });
+    sessionStorage.removeItem("editQuiz");
     window.location.href = "ogretmen.html";
-    localStorage.removeItem("editQuiz");
     alert("Quiz güncellendi");
 }
 
