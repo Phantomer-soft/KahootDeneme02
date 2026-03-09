@@ -23,28 +23,6 @@ services:
       - mysqldata:/var/lib/mysql
     restart: always
 
-  wireguard:
-    image: linuxserver/wireguard:latest
-    container_name: wireguard
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Istanbul
-      - SERVERURL=5.175.136.193 
-      - SERVERPORT=51820
-      - PEERS=sero_laptop,sero_phone 
-      - PEERDNS=auto
-      - INTERNAL_NM=10.13.13.0 
-    ports:
-      - "51820:51820/udp" 
-    volumes:
-      - ./wireguard-config:/config
-      - /lib/modules:/lib/modules
-    restart: always
-
   phpmyadmin:
     image: phpmyadmin:latest
     environment:
