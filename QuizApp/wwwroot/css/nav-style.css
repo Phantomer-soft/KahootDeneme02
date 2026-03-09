@@ -1,0 +1,202 @@
+/*navigation bar*/
+* {
+    margin: 0;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: sans-serif;
+
+}
+
+body {
+    width: 100%;
+    height: 100vh;
+    background-image: url(../photos/backgroundPhoto.png);
+    background-size: cover;
+    /* Resmin ekrana sığması için */
+    background-position: center;
+    /* Resmi ortala */
+    background-repeat: no-repeat;
+    /* Resmi tekrarlama */
+}
+
+nav {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-content: space-between;
+    margin-top: 10px;
+
+    padding: 0 20px;
+    /* Kenar boşlukları */
+}
+
+.logo {
+    display: flex;
+    /*yanyana hizalama*/
+    gap: 10px;
+    /*aralarındaki boşluk*/
+    align-items: center;
+    /*dikeyde hizalama*/
+}
+
+nav .logo img {
+    width: 70px;
+    border-radius: 50%;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+
+}
+
+nav .logo img:hover {
+    transform: scale(1.05);
+    /*üzerine gelince resmi büyüt*/
+}
+
+nav .logo a {
+    text-decoration: none;
+}
+
+nav .logo h2 {
+    color: whitesmoke;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    /* Responsive font size */
+}
+
+nav .logo h2:hover {
+    transform: scale(1.05);
+    /*üzerine gelince yazıyı büyüt*/
+}
+
+nav .links {
+    display: flex;
+    /*flex etkinleştir*/
+    align-items: center;
+    /*dikeyde hizalama*/
+
+}
+
+nav .links ul {
+    display: flex;
+    /*yanyana hizala*/
+    gap: 35px;
+    /*aralarındaki boşluk*/
+}
+
+nav .links ul li {
+    list-style: none;
+
+}
+
+nav .links ul li a {
+    color: whitesmoke;
+    text-decoration: none;
+    display: inline-block;
+    /* Transform çalışması için */
+    transition: transform 0.3s ease;
+    /* Yumuşak geçiş efekti */
+
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    /* Responsive font size */
+    padding: 5px 0;
+    /* Tıklanabilir alanı büyüt */
+}
+
+nav .links ul li a:hover {
+    transform: scale(1.05);
+    /*üzerine gelince yazıyı büyüt*/
+}
+
+/* === RESPONSIVE === */
+
+/*büyük ekranlar için (1200px ve üstü)*/
+@media screen and (min-width:1200px) {
+    nav {
+        padding: 0;
+    }
+}
+
+/* yükseklik kısıtlı ekran (?)*/
+@media sceen and (ma-height:600px) {
+    body {
+        height: auto;
+        min-height: 100vh;
+    }
+}
+
+/*tablet boyutu (768px ve daha küçük)*/
+@media screen and (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        gap: 15px;
+        padding: 10px 20px;
+    }
+
+    nav .logo {
+        justify-content: center;
+    }
+
+    nav .logo img {
+        width: 60px;
+    }
+
+    nav .links ul {
+        gap: 25px;
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+
+    nav .links {
+        justify-content: center;
+
+    }
+
+    body {
+        background-attachment: fixed;
+        /*mobilde arkaplan sabit*/
+    }
+}
+
+/*mobil boyutu (480px ve altı)*/
+@media screen and (max-width:480px) {
+    nav {
+        padding: 10px 15px;
+        align-items: center;
+        /*ortaya hizala*/
+    }
+
+    nav .logo {
+        gap: 8px;
+    }
+
+    nav .links ul {
+        gap: 15px;
+    }
+
+    nav .links ul li a {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+}
+
+/*daha küçük ekranlar için (360px ve altı)*/
+@media screen and (max-width: 360px) {
+    nav .links ul {
+        gap: 10px;
+    }
+
+    nav .links ul li a {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+
+    nav .logo img {
+        width: 45px;
+    }
+}

@@ -1,0 +1,612 @@
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #e2e8f0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Modern Card Tasarımı */
+.card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    padding: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 32px;
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+/* Form Elemanları */
+.form-group {
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input {
+    width: 100%;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    font-size: 1rem;
+    color: #f1f5f9;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #60a5fa;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+}
+
+input::placeholder {
+    color: #475569;
+}
+
+/* Modern Butonlar */
+button {
+    width: 100%;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 30px -10px rgba(96, 165, 250, 0.5);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    background: #475569;
+}
+
+/* Bekleme Ekranı */
+.waiting {
+    text-align: center;
+    padding: 60px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.waiting h2 {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 32px;
+}
+
+.waiting p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+/* Modern Loader */
+.loader {
+    width: 80px;
+    height: 80px;
+    margin: 30px auto;
+    border: 4px solid rgba(96, 165, 250, 0.1);
+    border-top: 4px solid #60a5fa;
+    border-right: 4px solid #a78bfa;
+    border-radius: 50%;
+    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    box-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Soru Container */
+.question-header {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    padding: 30px;
+    border-radius: 24px;
+    margin-bottom: 30px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.timer {
+    font-size: 4rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 30px rgba(96, 165, 250, 0.5);
+}
+
+.timer.warning {
+    background: linear-gradient(135deg, #f87171, #ef4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.question-text {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 30px 0;
+    text-align: center;
+    line-height: 1.4;
+    color: #f1f5f9;
+}
+
+/* Seçenekler */
+.options {
+    display: grid;
+    gap: 16px;
+    margin: 30px 0;
+}
+
+.option-btn {
+    padding: 20px 24px;
+    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.option-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.option-btn:hover::before {
+    left: 100%;
+}
+
+.option-btn:hover:not(:disabled) {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+    transform: translateX(5px);
+    box-shadow: 0 10px 20px -10px rgba(96, 165, 250, 0.3);
+}
+
+.option-btn.selected {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.2);
+    box-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+}
+
+.option-btn.correct {
+    border-color: #4ade80;
+    background: rgba(74, 222, 128, 0.2);
+}
+
+.option-btn.wrong {
+    border-color: #f87171;
+    background: rgba(248, 113, 113, 0.2);
+}
+
+.option-btn strong {
+    color: #60a5fa;
+    margin-right: 12px;
+    font-size: 1.3rem;
+}
+
+/* Liderlik Tablosu - Düzenlenmiş Versiyon */
+.leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 30px 0;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 25px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.leaderboard-item:hover {
+    transform: translateX(5px);
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.1);
+}
+
+.leaderboard-item.highlight {
+    background: rgba(96, 165, 250, 0.2);
+    border: 2px solid #60a5fa;
+    box-shadow: 0 0 30px rgba(96, 165, 250, 0.3);
+}
+
+.rank {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.rank-emoji {
+    font-size: 1.8rem;
+    min-width: 50px;
+}
+
+.rank-number {
+    color: #94a3b8;
+    min-width: 40px;
+}
+
+.player-name {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #f1f5f9;
+    flex: 1;
+    margin: 0 15px;
+}
+
+.player-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    min-width: 80px;
+    text-align: right;
+}
+
+.leaderboard-footer {
+    text-align: center;
+    margin-top: 30px;
+    color: #94a3b8;
+    font-size: 1rem;
+}
+
+/* Skor Gösterimi */
+.score-display {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 40px;
+    text-align: center;
+    margin: 30px 0;
+}
+
+.score-number {
+    font-size: 6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin: 20px 0;
+    text-shadow: 0 0 50px rgba(96, 165, 250, 0.5);
+}
+
+/* Feedback Mesajları */
+.feedback {
+    padding: 16px 24px;
+    border-radius: 100px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feedback.correct {
+    background: rgba(74, 222, 128, 0.2);
+    border: 1px solid #4ade80;
+    color: #4ade80;
+}
+
+.feedback.wrong {
+    background: rgba(248, 113, 113, 0.2);
+    border: 1px solid #f87171;
+    color: #f87171;
+}
+
+.status {
+    padding: 16px;
+    margin: 16px 0;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.status.success {
+    background: rgba(74, 222, 128, 0.2);
+    border: 1px solid #4ade80;
+    color: #4ade80;
+}
+
+.status.error {
+    background: rgba(248, 113, 113, 0.2);
+    border: 1px solid #f87171;
+    color: #f87171;
+}
+
+/* Bekleme Overlay'i */
+.waiting-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.waiting-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 32px;
+    padding: 40px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.waiting-card h3 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.waiting-card p {
+    color: #94a3b8;
+    margin: 20px 0;
+    font-size: 1.1rem;
+}
+
+.waiting-card .mini-loader {
+    width: 50px;
+    height: 50px;
+    margin: 20px auto;
+    border: 3px solid rgba(96, 165, 250, 0.1);
+    border-top: 3px solid #60a5fa;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.waiting-card .success-icon {
+    font-size: 4rem;
+    margin: 20px 0;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Şampiyon Animasyonu */
+.champion {
+    font-size: 5rem;
+    animation: championBounce 1s ease infinite;
+    margin: 20px 0;
+}
+
+@keyframes championBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+/* Responsive Tasarım */
+@media (max-width: 768px) {
+    .card {
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    .timer {
+        font-size: 3rem;
+    }
+
+    .question-text {
+        font-size: 1.5rem;
+    }
+
+    .option-btn {
+        padding: 16px 20px;
+        font-size: 1rem;
+    }
+
+    .score-number {
+        font-size: 4rem;
+    }
+
+    .leaderboard-item {
+        padding: 15px 20px;
+    }
+
+    .rank {
+        font-size: 1.1rem;
+    }
+
+    .rank-emoji {
+        font-size: 1.5rem;
+        min-width: 40px;
+    }
+
+    .player-name {
+        font-size: 1rem;
+    }
+
+    .player-score {
+        font-size: 1.2rem;
+        min-width: 60px;
+    }
+}
+
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+}
+
+/* PIN Kodu Özel Stili */
+#pinCode {
+font-family: 'Courier New', monospace;
+font-size: 1.5rem;
+letter-spacing: 4px;
+text-align: center;
+}
+
+/* Oyun Bitti Ekranı */
+.game-over {
+    text-align: center;
+}
+
+.game-over h2 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.game-over button {
+    max-width: 300px;
+    margin: 30px auto;
+}

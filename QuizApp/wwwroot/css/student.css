@@ -1,0 +1,483 @@
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+h1, h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+input:focus {
+    border-color: #43e97b;
+    outline: none;
+}
+
+button {
+    width: 100%;
+    background: #43e97b;
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+button:hover:not(:disabled) {
+    background: #38d66a;
+    transform: translateY(-2px);
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Bekleme Ekranı */
+.waiting {
+    text-align: center;
+    padding: 40px;
+}
+
+.waiting h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #43e97b;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+/* Overlay Stilleri */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.overlay-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.overlay-content h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.overlay-content p {
+    font-size: 16px;
+    color: #666;
+    margin-top: 15px;
+}
+
+.mini-loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #43e97b;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+.success-icon {
+    font-size: 48px;
+    margin: 20px 0;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+/* Soru Container */
+.question-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.question-header div:first-child {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 10px;
+}
+
+.timer {
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+    color: white;
+}
+
+.timer.warning {
+    color: #ff6b6b;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.question-text {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 20px 0;
+    text-align: center;
+    color: #333;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.options {
+    display: grid;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.option-btn {
+    padding: 25px;
+    font-size: 20px;
+    border: 3px solid #ddd;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-radius: 10px;
+    text-align: left;
+    color: #333;
+    font-weight: 500;
+}
+
+.option-btn:hover:not(:disabled) {
+    border-color: #43e97b;
+    background: #f0fdf4;
+    transform: scale(1.02);
+}
+
+.option-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.option-btn.selected {
+    border-color: #43e97b;
+    background: #d1fae5;
+}
+
+.option-btn.correct {
+    border-color: #22c55e;
+    background: #dcfce7;
+}
+
+.option-btn.wrong {
+    border-color: #ef4444;
+    background: #fee2e2;
+}
+
+/* Liderlik Tablosu */
+.leaderboard-container {
+    margin: 20px 0;
+}
+
+.leaderboard-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    margin: 10px 0;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s;
+}
+
+.leaderboard-item.highlight {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(67, 233, 123, 0.3);
+}
+
+.leaderboard-item .rank {
+    width: 50px;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rank-emoji {
+    font-size: 24px;
+}
+
+.rank-number {
+    color: #666;
+}
+
+.leaderboard-item.highlight .rank-number {
+    color: white;
+}
+
+.player-name {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.player-score {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.leaderboard-item.highlight .player-score {
+    color: white;
+}
+
+.leaderboard-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    color: #666;
+    font-size: 16px;
+}
+
+/* Oyun Sonu */
+.game-over {
+    text-align: center;
+    padding: 20px;
+}
+
+.game-over h2 {
+    font-size: 3rem;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.score-display {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 32px;
+    padding: 40px;
+    margin: 30px 0;
+}
+
+.score-display > div:first-child {
+    font-size: 1.2rem;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+.score-display > div:nth-child(2) {
+    font-size: 6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+    margin: 20px 0;
+}
+
+.score-display > div:last-child {
+    font-size: 1.5rem;
+    color: #667eea;
+    margin-top: 10px;
+}
+
+.champion {
+    font-size: 80px;
+    margin: 20px 0;
+    animation: bounce 1s infinite;
+}
+
+/* Status Mesajları */
+.status {
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    animation: slideIn 0.3s ease;
+}
+
+.status.success {
+    background: #d4edda;
+    color: #155724;
+    border-left: 5px solid #28a745;
+}
+
+.status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border-left: 5px solid #dc3545;
+}
+/* Anasayfa Butonu Konumlandırma - GÜNCELLENDİ */
+.back-to-home {
+    display: flex;
+    justify-content: flex-start; /* Sola yasla */
+    margin-bottom: 15px; /* Altındaki içerikle mesafe bırak */
+}
+
+/* Butonun Genel Tasarımı */
+.home-btn {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #ffffff;
+    color: #43e97b; /* Sayfa temasına uygun yeşil tonu yapıldı */
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 50px;
+    border: 2px solid #43e97b;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Üzerine gelince (Hover) */
+.home-btn:hover {
+    background-color: #43e97b;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Tıklandığında (Active) */
+.home-btn:active {
+    transform: translateY(0);
+}
+
+/* Mobilde butonun konumu */
+@media (max-width: 600px) {
+    .back-to-home {
+        margin-bottom: 10px;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Gizleme */
+.hidden {
+    display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .card {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .question-text {
+        font-size: 20px;
+    }
+
+    .option-btn {
+        padding: 20px;
+        font-size: 18px;
+    }
+
+    .timer {
+        font-size: 36px;
+    }
+
+    .score-display > div:nth-child(2) {
+        font-size: 4rem;
+    }
+}
